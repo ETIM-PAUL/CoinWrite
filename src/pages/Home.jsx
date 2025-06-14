@@ -172,13 +172,3 @@ export default function CoinWriteLanding() {
 
   );
 }
-
-function Feature({ icon: Icon, title, desc }) {
-  return (
-    <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow hover:shadow-lg transition duration-300">
-      <Icon className="h-8 w-8 text-[#FFA62B] mb-4" />
-      <h4 className="text-lg font-semibold mb-2 text-gray-800">{title}</h4>
-      <p className="text-sm text-gray-600">{desc}</p>
-    </div>
-  );
-}
