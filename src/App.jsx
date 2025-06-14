@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import './App.css'
-import Home from './pages/home'
 import { ArrowRightIcon } from 'lucide-react'
+import LandingPage from './pages/home'
 
 function App() {
 
@@ -29,7 +29,7 @@ function App() {
       </header>
 
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<LandingPage />} />
           <Route path="/about" element={<h1>About Page</h1>} />
         </Routes>
       </div>

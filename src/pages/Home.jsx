@@ -14,7 +14,7 @@ const categories = [
   "Movies", "Sports", "Politics", "Economy"
 ];
 
-export default function home() {
+function LandingPage() {
   const [isOpen, setIsOpen] = useState(false);
   const [blogs, setBlogs] = useState([
     {
@@ -172,3 +172,5 @@ export default function home() {
 
   );
 }
+
+export default LandingPage;
