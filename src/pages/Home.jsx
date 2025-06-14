@@ -14,7 +14,7 @@ const categories = [
   "Movies", "Sports", "Politics", "Economy"
 ];
 
-export default function CoinWriteLanding() {
+export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
   const [blogs, setBlogs] = useState([
     {
