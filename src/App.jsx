@@ -9,7 +9,7 @@ function App() {
 
   return (
     <Router>
-      <div className=''>
+      <div className='px-8'>
       <header className="flex items-center justify-between py-6">
         <div className='flex items-center space-x-10'>
           <h1 className="text-xl font-bold text-[#9e74eb]">Coinwrite</h1>
