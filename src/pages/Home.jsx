@@ -14,7 +14,7 @@ const categories = [
   "Movies", "Sports", "Politics", "Economy"
 ];
 
-export default function Home() {
+export default function home() {
   const [isOpen, setIsOpen] = useState(false);
   const [blogs, setBlogs] = useState([
     {
