@@ -7,7 +7,7 @@ import laugh from "../assets/laugh_me.png"; // Replace with actual hero image pa
 import everything from "../assets/everything_goes.jpg"; // Replace with actual hero image path
 import time from "../assets/time_now.png"; // Replace with actual hero image path
 import three from "../assets/three_crazy_friends.png"; // Replace with actual hero image path
-
+import HomePageHeader from "../components/HomePageHeader";
 const categories = [
   "Tech", "Finance", "Art", "Culture", "Web3", "Gaming", "Education",
   "Science","Health", "Travel","Food", "Entertainment", "Music",
@@ -55,15 +55,15 @@ function LandingPage() {
   ]);
 
   return (
-      <div>
-    
-        <div className="bg-[#f6f2ff] rounded-xl border border-[#f6f2ff] px-0 md:px-8 text-gray-900 font-sans scroll-smooth">
+      <div className="px-8">
+        <HomePageHeader />
+        <div className="bg-[#f6f2ff] rounded-xl border border-[#f6f2ff] px-0 md:px-8 text-gray-900 scroll-smooth">
 
         {/* Hero Section */}
         <section className="pt-16">
           <div className="mx-auto grid md:grid-cols-2 gap-16 items-center">
             <div className="gap-6 flex flex-col items-start max-w-[400px]">
-              <h2 className="w-full h-full overflow-hidden text-4xl leading-12 font-extrabold text-left whitespace-pre-line break-words opacity-100 visible font-[Raleway]">
+              <h2 className="w-full h-full overflow-hidden text-4xl leading-12 font-extrabold text-left whitespace-pre-line break-words opacity-100 visible">
                 Turn ideas into tokens and earn as you write.
               </h2>
               <p className="text-gray-600 text-lg whitespace-pre-line break-words text-start">
