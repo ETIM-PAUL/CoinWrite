@@ -55,19 +55,14 @@ const TopHeader = () => {
 
       {/* Right side actions */}
       <div className="flex gap-3 items-center justify-end w-full lg:w-1/2 mt-2 lg:mt-0">
-        <img
-          src={DarkNotyIcon}
-          alt="Notifications"
-          className="rounded-full border-2 p-2 w-10 h-10"
-        />
-        <div className="flex gap-2 items-center text-gray-800 dark:text-gray-200">
+        <div className="flex gap-2 items-center text-black">
           <img
             src={Profile}
             alt="Profile"
             className="w-10 h-10"
           />
           <span className="hidden lg:flex items-center font-medium">
-            @etimpaul
+            @undefined
           </span>
           <img src={DarkDropDown} alt="Dropdown" />
         </div>

@@ -5,9 +5,9 @@ import NFT4 from "../assets/NFTs/NFT4.png";
 import NFT5 from "../assets/NFTs/NFT5.png";
 import NFT6 from "../assets/NFTs/NFT6.png";
 import { MdAlarm } from "react-icons/md";
-
+import { useNavigate } from "react-router-dom";
 const SidePanel = () => {
-
+  const navigate = useNavigate();
   const arraysUsers = [
     { username: "@crayionbin", items: 8.25 },
     { username: "@artcrafted", items: 3.2 },
@@ -21,7 +21,7 @@ const SidePanel = () => {
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold text-gray-900">Top Posts</h2>
-          <span className="text-blue-500 text-sm cursor-pointer">See more</span>
+          <span onClick={() => navigate('/for-you')} className="text-blue-500 text-sm cursor-pointer">See more</span>
         </div>
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">

@@ -27,14 +27,14 @@ const SideBar = () => {
       </div>
 
       <div className="mt-2 pt-5 px-3">
-        <SideBarItem title="Dashboard" lightIcon={Dashboard} darkIcon={DashboardDark} link="" />
-        <SideBarItem title="For You" lightIcon={Market} darkIcon={MarketDark} link="for-you" />
-        <SideBarItem title="My collection" lightIcon={Col} darkIcon={ColDark} link="collection" />
+        <SideBarItem title="Dashboard" lightIcon={Dashboard} darkIcon={DashboardDark} link="/dashboard" />
+        <SideBarItem title="For You" lightIcon={Market} darkIcon={MarketDark} link="/for-you" />
+        <SideBarItem title="My Collection" lightIcon={Col} darkIcon={ColDark} link="/collection" />
       </div>
       <div className="mt-5 pt-2 px-3">
         <span className="font-semibold text-gray-400">Profile</span>
-        <SideBarItem title="My wallet" lightIcon={Wallet} darkIcon={WalletDark} link="my-wallet" />
-        <SideBarItem title="Settings" lightIcon={Setting} darkIcon={SettingDark} link="settings" />
+        <SideBarItem title="My Wallet" lightIcon={Wallet} darkIcon={WalletDark} link="/my-wallet" />
+        <SideBarItem title="Settings" lightIcon={Setting} darkIcon={SettingDark} link="/settings" />
       </div>
 
     </div>

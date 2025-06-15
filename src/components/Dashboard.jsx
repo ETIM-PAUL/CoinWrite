@@ -64,6 +64,7 @@ const Dashboard = () => {
               username="@yur3i"
               loved={Loved}
               notLoved={Heart}
+              type="dashboard"
             />
             <NftCard
               nftImg={NFT2}
@@ -73,6 +74,7 @@ const Dashboard = () => {
               username="@undefined"
               loved={Loved}
               notLoved={Heart}
+              type="dashboard"
             />
             <NftCard
               nftImg={NFT3}
@@ -82,6 +84,7 @@ const Dashboard = () => {
               username="@stark"
               notLoved={Heart}
               loved={Loved}
+              type="dashboard"
             />
           </div>
         </section>
@@ -101,12 +104,12 @@ const Dashboard = () => {
           </div>
         </section>
         
-        <section className="px-3 pt-3 pb-5">
+        <section className="px-3 pt-3 pb-24">
           <div className="w-full text-sm flex justify-between">
             <span className="font-bold text-gray-900">Top Categories</span>
             <span className="text-blue-500 mr-2 cursor-pointer">See more</span>
           </div>
-          <div className="py-2 px-2 mt-3 flex w-full bg-white rounded-lg shadow overflow-auto h-48">
+          <div className="py-2 px-2 mt-3 flex w-full bg-white rounded-lg shadow overflow-auto">
             <table className="w-full">
               <thead className="text-gray-900">
                 <tr className="border-b border-gray-200">
@@ -117,7 +120,7 @@ const Dashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                <tr className="">
+                <tr className="py-">
                   <td className="px-4">
                     <span>Web3</span>
                   </td>
