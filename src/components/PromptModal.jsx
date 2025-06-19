@@ -3,17 +3,8 @@ import { Dialog, Transition } from '@headlessui/react';
 import { toast } from 'react-toastify';
 import darkMarket from "../assets/icons/darkMarket.svg";
 
-const PurchaseModal = ({ isOpen, onClose, amount }) => {
-  const [purchasing, setPurchasing] = useState(false);
+const PurchaseModal = ({ isOpen, onClose, loading, setLoading, heading, description, handleAction, type, amount, setAmount }) => {
 
-  const handlePurchase = () => {
-    setPurchasing(true);
-    setTimeout(() => {
-      setPurchasing(false);
-      toast.success('Purchase successful');
-      onClose();
-    }, 1000);
-  };
   return (
     <Transition appear show={isOpen} as={React.Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
@@ -47,17 +38,29 @@ const PurchaseModal = ({ isOpen, onClose, amount }) => {
                   as="h3"
                   className="text-lg font-medium leading-6 text-gray-900"
                 >
-                  Purchase Blog Post
+                  {heading}
                 </Dialog.Title>
 
                 <Dialog.Description className="text-sm text-red-500 mt-2">
-                    Purchase the blog post for {amount} Zoro. After purchase, all new tips will be sent to your wallet. You can also put it up for sale.
+                    {description}
                 </Dialog.Description>
 
+                {type === "forSale" && (
+                  <div className="mt-4">
+                  <input
+                    type="number"
+                    placeholder="Enter amount"
+                    value={amount}
+                    min={0}
+                    onChange={(e) => setAmount(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-lg mb-4"
+                  />
+                </div>
+                )}
                 <div className="mt-10 flex justify-end gap-2">
                   <button
                     type="button"
-                    disabled={purchasing}
+                    disabled={loading}
                     className="inline-flex w-full disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer justify-center rounded-md border border-transparent bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
                     onClick={onClose}
                   >
@@ -65,12 +68,17 @@ const PurchaseModal = ({ isOpen, onClose, amount }) => {
                   </button>
                   <button
                     type="button"
-                    disabled={!amount || purchasing}
+                    disabled={loading}
                     className="inline-flex w-full disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer justify-center rounded-md border border-transparent bg-[#9e74eb] gap-2 px-4 py-2 text-sm font-medium text-white hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#9e74eb] focus-visible:ring-offset-2"
-                    onClick={handlePurchase}
+                    onClick={handleAction}
                   >
-                    {purchasing ? 'Purchasing...' : 'Purchase'}
-                    <img src={darkMarket} alt="" className="w-5 h-5" />
+                    {loading ? 'Processing...' : 'Proceed'}
+                    {type === "purchase" && (
+                      <img src={darkMarket} alt="" className="w-5 h-5" />
+                    )}
+                    {type === "purchase" && (
+                      <img src={darkMarket} alt="" className="w-5 h-5" />
+                    )}
                   </button>
                 </div>
               </Dialog.Panel>

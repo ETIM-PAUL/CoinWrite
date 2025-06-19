@@ -9,7 +9,7 @@ import { GiMoneyStack } from 'react-icons/gi';
 import NFT1 from "../assets/NFTs/NFT1.png";
 import TipModal from './TipModal';
 import darkMarket from "../assets/icons/darkMarket.svg";
-import PurchaseModal from './PurchaseModal';
+import PromptModal from './PromptModal';
 
 const BlogPostDetails = () => {
   const { forYouPosts } = useContext(PostsContext);
@@ -17,6 +17,11 @@ const BlogPostDetails = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
+  const [isPutUpForSaleModalOpen, setIsPutUpForSaleModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [amount, setAmount] = useState(0);
+  const [isRemoveFromSaleModalOpen, setIsRemoveFromSaleModalOpen] = useState(false);
+
   const post = forYouPosts.find((post) => post.id === Number(id));
 
 
@@ -24,6 +29,33 @@ const BlogPostDetails = () => {
     return <div className='text-center mt-4 text-2xl h-screen flex items-center justify-center'>Post not found</div>;
   }
 
+  const handlePurchase = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      setIsPurchaseModalOpen(false);
+      toast.success('Purchase successful');
+      onClose();
+    }, 1000);
+  };
+
+  const handleRemoveFromSale = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      toast.success('Post updated successful');
+      setIsRemoveFromSaleModalOpen(false);
+    }, 1000);
+  };
+
+  const handlePutUpForSale = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      toast.success('Post updated successfully');
+      setIsPutUpForSaleModalOpen(false);
+    }, 1000);
+  };
 
   return (
     <div className="bg-white px-5 min-h-screen text-gray-800">
@@ -62,29 +94,55 @@ const BlogPostDetails = () => {
             <span>{post?.date}</span>
           </div>
 
-          <div className="flex items-center w-full">
-            {post?.forSale && (
+          {post?.username !== "@undefined" && (
+            <div className="flex items-center w-full">
+              {post?.forSale && (
+                <div className="w-full flex justify-end">
+                  <button
+                    onClick={() => setIsPurchaseModalOpen(true)}
+                  className="w-fit flex items-center gap-2 cursor-pointer text-center bg-[#9e74eb] hover:opacity-90 text-white px-6 py-3 rounded-xl transition duration-300 shadow-md"
+                >
+                  <span className="text-sm">Purchase Content</span>
+                  <img src={darkMarket} alt="" className="w-5 h-5" />
+                </button>
+              </div>
+              )}
               <div className="w-full flex justify-end">
                 <button
-                  onClick={() => setIsPurchaseModalOpen(true)}
-                className="w-fit flex items-center gap-2 cursor-pointer text-center bg-[#9e74eb] hover:opacity-90 text-white px-6 py-3 rounded-xl transition duration-300 shadow-md"
-              >
-                <span className="text-sm">Purchase Content</span>
-                <img src={darkMarket} alt="" className="w-5 h-5" />
-              </button>
+                  onClick={() => setIsModalOpen(true)}
+                  className="w-fit flex items-center gap-2 cursor-pointer text-center bg-[#9e74eb] hover:opacity-90 text-white px-6 py-3 rounded-xl transition duration-300 shadow-md"
+                >
+                  <span className="text-sm">Tip Content</span>
+                  <GiMoneyStack className="w-5 h-5" />
+                </button>
+              </div>
             </div>
-            )}
-            <div className="w-full flex justify-end">
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="w-fit flex items-center gap-2 cursor-pointer text-center bg-[#9e74eb] hover:opacity-90 text-white px-6 py-3 rounded-xl transition duration-300 shadow-md"
-              >
-                <span className="text-sm">Tip Content</span>
-                <GiMoneyStack className="w-5 h-5" />
-              </button>
+          )}
+          {post?.username === "@undefined" && (
+            <div className="flex items-center w-full">
+              {post?.forSale ? (
+                <div className="w-full flex justify-end">
+                  <button
+                    onClick={() => setIsRemoveFromSaleModalOpen(true)}
+                  className="w-fit flex items-center gap-2 cursor-pointer text-center bg-[#9e74eb] hover:opacity-90 text-white px-6 py-3 rounded-xl transition duration-300 shadow-md"
+                >
+                  <span className="text-sm">Remove Post From Sale</span>
+                  <img src={darkMarket} alt="" className="w-5 h-5" />
+                </button>
+              </div>
+              ) : (
+                <div className="w-full flex justify-end">
+                  <button
+                    onClick={() => setIsPutUpForSaleModalOpen(true)}
+                  className="w-fit flex items-center gap-2 cursor-pointer text-center bg-[#9e74eb] hover:opacity-90 text-white px-6 py-3 rounded-xl transition duration-300 shadow-md"
+                >
+                  <span className="text-sm">Put Post Up For Sale</span>
+                  <img src={darkMarket} alt="" className="w-5 h-5" />
+                </button>
+                </div>
+              )}
             </div>
-
-          </div>
+          )}
         </div>
 
         <div>
@@ -98,11 +156,38 @@ const BlogPostDetails = () => {
         onClose={() => setIsModalOpen(false)}
       />
 
-      {/* Purchase Modal */}
-      <PurchaseModal
+      {/* Prompt Modal */}
+      <PromptModal
+        isOpen={isPutUpForSaleModalOpen}
+        heading="Put Post Up For Sale"
+        description={`Put the blog post up for sale. If purchased, all new tips will be sent to new owner's wallet.`}
+        handleAction={handlePutUpForSale}
+        onClose={() => setIsPutUpForSaleModalOpen(false)}
+        type="forSale"
+        loading={loading}
+        setLoading={setLoading}
+        amount={amount}
+        setAmount={setAmount}
+      />
+      <PromptModal
         isOpen={isPurchaseModalOpen}
-        amount={post?.amount}
+        heading="Purchase Blog Post"
+        description={`Purchase the blog post for ${post?.amount} Zoro. After purchase, all new tips will be sent to your wallet.`}
+        handleAction={handlePurchase}
         onClose={() => setIsPurchaseModalOpen(false)}
+        type="purchase"
+        loading={loading}
+        setLoading={setLoading}
+      />
+      <PromptModal
+        isOpen={isRemoveFromSaleModalOpen}
+        heading="Remove Post From Sale"
+        description={`Remove the blog post from sale. After removal, the post will no longer be available for purchase.`}
+        handleAction={handleRemoveFromSale}
+        onClose={() => setIsRemoveFromSaleModalOpen(false)}
+        type="remove"
+        loading={loading}
+        setLoading={setLoading}
       />
     </div>
   )

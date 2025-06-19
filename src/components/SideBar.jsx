@@ -34,7 +34,7 @@ const SideBar = () => {
       <div className="mt-5 pt-2 px-3">
         <span className="font-semibold text-gray-400">Profile</span>
         <SideBarItem title="My Wallet" lightIcon={Wallet} darkIcon={WalletDark} link="/my-wallet" />
-        <SideBarItem title="Settings" lightIcon={Setting} darkIcon={SettingDark} link="/settings" />
+        {/* <SideBarItem title="Settings" lightIcon={Setting} darkIcon={SettingDark} link="/settings" /> */}
       </div>
 
     </div>

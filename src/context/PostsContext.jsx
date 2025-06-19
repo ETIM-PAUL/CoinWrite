@@ -16,7 +16,7 @@ export const PostsProvider = ({ children }) => {
       nftImg: NFT1,
       nftName: "ZoroChain SDK Practice",
       amount: "12.5",
-      username: "@yur3i",
+      username: "@undefined",
       category: "Art",
       forSale: true,
       loved: Loved,
