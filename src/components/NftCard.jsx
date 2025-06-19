@@ -4,10 +4,12 @@ import darkMarket from "../assets/icons/darkMarket.svg";
 import fire from "../assets/icons/fire.svg";
 import { RxEyeOpen } from "react-icons/rx";
 import { CgReadme } from "react-icons/cg";
+import { useNavigate } from "react-router-dom";
 
 const NftCard = ({ ...props }) => {
 
   const [loved, setLoved] = useState(true);
+  const navigate = useNavigate();
   return (
     <div className="py-2 gro mb-4 px-2 bg-white rounded-lg shadow relative">
       <img src={props.nftImg} alt="" className="w-full h-auto" />
@@ -56,6 +58,7 @@ const NftCard = ({ ...props }) => {
       )}
       {(props.type === "forYou" && props.classType !== "collection") && (
         <button
+          onClick={() => navigate(`/blog_details/${props.id}`)}
           className="w-full bg-[#9e74eb] cursor-pointer hover:opacity-90 text-white p-2 mt-3 flex justify-center gap-2 items-center rounded-lg"
         >
           <CgReadme className="w-5 h-5" />
@@ -72,6 +75,7 @@ const NftCard = ({ ...props }) => {
       )}
       {(props.classType === "collection" && props.type === "forYou") && (
         <button
+          onClick={() => navigate(`/blog_details/${props.id}`)}
           className="w-full bg-[#9e74eb] cursor-pointer hover:opacity-90 text-white p-2 mt-3 flex justify-center gap-2 items-center rounded-lg"
         >
           <CgReadme className="w-5 h-5" />

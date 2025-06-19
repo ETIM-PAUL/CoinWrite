@@ -8,6 +8,7 @@ import Collection from './pages/collection.jsx'
 import ForYou from './pages/foryou.jsx'
 import MyWallet from './pages/mywallet.jsx'
 import Settings from './pages/settings.jsx'
+import BlogDetails from './pages/blog_details.jsx'
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="/collection" element={<Collection />} />
           <Route path="/my-wallet" element={<MyWallet />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/blog_details/:id" element={<BlogDetails />} />
         </Routes>
       </div>
     </Router>

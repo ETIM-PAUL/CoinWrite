@@ -1,11 +1,7 @@
-import React, { useState } from "react";
-import NFT1 from "../assets/NFTs/NFT1.png";
-import NFT2 from "../assets/NFTs/NFT2.png";
-import NFT3 from "../assets/NFTs/NFT3.png";
+import React, { useContext, useState } from "react";
 import NftCard from "./NftCard";
-import Loved from "../assets/icons/loved.svg";
-import Heart from "../assets/icons/heart.svg";
 import { PlusIcon } from "lucide-react";
+import { PostsContext } from "../context/PostsContext";
 
 const FilterValue = ({ value, setFilter, filter }) => {
   return (
@@ -22,6 +18,7 @@ const FilterValue = ({ value, setFilter, filter }) => {
 
 const ForYouPiece = ({ classType }) => {
   const [filter, setFilter] = useState("Art");
+  const { forYouPosts } = useContext(PostsContext);
 
   return (
     <div className="flex">
@@ -51,105 +48,13 @@ const ForYouPiece = ({ classType }) => {
             </div>
           )}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-3">
+          {forYouPosts.length > 0 && forYouPosts.map((post) => (
             <NftCard
-              nftImg={NFT1}
-              category="Web3"
-              nftName="ZoroChain SDK Practice"
-              amount="12.5"
-              username="@yur3i"
-              loved={Loved}
-              notLoved={Heart}
-              type="forYou"
-              classType={classType}
+              key={post.id}
+              {...post}
+              classType={"forYou"}
             />
-            <NftCard
-              nftImg={NFT1}
-              category="Web3"
-              nftName="ZoroChain SDK Practice"
-              amount="12.5"
-              username="@yur3i"
-              loved={Loved}
-              notLoved={Heart}
-              type="forYou"
-              classType={classType}
-            />
-            <NftCard
-              nftImg={NFT1}
-              category="Web3"
-              nftName="ZoroChain SDK Practice"
-              amount="12.5"
-              username="@yur3i"
-              loved={Loved}
-              notLoved={Heart}
-              type="forYou"
-              classType={classType}
-            />
-            <NftCard
-              nftImg={NFT2}
-              category="Art"
-              nftName="Time is money"
-              amount="11.0"
-              username="@undefined"
-              loved={Loved}
-              notLoved={Heart}
-              type="forYou"
-              classType={classType}
-            />
-            <NftCard
-              nftImg={NFT2}
-              category="Art"
-              nftName="Time is money"
-              amount="11.0"
-              username="@undefined"
-              loved={Loved}
-              notLoved={Heart}
-              type="forYou"
-              classType={classType}
-            />
-            <NftCard
-              nftImg={NFT2}
-              category="Art"
-              nftName="Time is money"
-              amount="11.0"
-              username="@undefined"
-              loved={Loved}
-              notLoved={Heart}
-              type="forYou"
-              classType={classType}
-            />
-            <NftCard
-              nftImg={NFT3}
-              category="Entertainment"
-              nftName="Love is in the air"
-              amount="10.2"
-              username="@stark"
-              notLoved={Heart}
-              loved={Loved}
-              type="forYou"
-              classType={classType}
-            />
-            <NftCard
-              nftImg={NFT3}
-              category="Entertainment"
-              nftName="Love is in the air"
-              amount="10.2"
-              username="@stark"
-              notLoved={Heart}
-              loved={Loved}
-              type="forYou"
-              classType={classType}
-            />
-            <NftCard
-              nftImg={NFT3}
-              category="Entertainment"
-              nftName="Love is in the air"
-              amount="10.2"
-              username="@stark"
-              notLoved={Heart}
-              loved={Loved}
-              type="forYou"
-              classType={classType}
-            />
+          ))}
           </div>
         </section>
 
