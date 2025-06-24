@@ -5,13 +5,24 @@ import { Dialog, Transition } from "@headlessui/react";
 import { Eye, ImagePlus, PlusIcon } from "lucide-react";
 import { toast } from "react-toastify";
 import { VscLoading } from "react-icons/vsc";
+import { GiArtificialIntelligence } from "react-icons/gi";
+// import { LMStudioClient } from "@lmstudio/sdk";
+import axios from "axios";
+
 const CreatePost = () => {
   const [title, setTitle] = useState("");
   const [banner, setBanner] = useState(null);
   const [content, setContent] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
   const [publishing, setPublishing] = useState(false);
-
+  const [aiAnalyze, setAiAnalyze] = useState(false);
+  const [publishedUrl, setPublishedUrl] = useState("");
+  const [publishedBannerUrl, setPublishedBannerUrl] = useState("");
+  const [confirmAnalyzeOpen, setConfirmAnalyzeOpen] = useState(false);
+  const [optimizedContentOpen, setOptimizedContentOpen] = useState(false);
+  const [optimizedContent, setOptimizedContent] = useState("");
+  // const client = new LMStudioClient();
+  
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -21,19 +32,126 @@ const CreatePost = () => {
     }
   };
 
-  const publishPost = () => {
+  const uploadImageToIPFS = async(base64Image) => {
+    try {
+      // Convert base64 to blob
+      const response = await fetch(base64Image);
+      const blob = await response.blob();
+      
+      // Create a File object from the blob
+      const file = new File([blob], 'image.jpg', { type: blob.type });
+      
+      const url = "https://api.pinata.cloud/pinning/pinFileToIPFS";
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch(url, {
+        method: "POST",
+        body: formData,
+        headers: {
+          Authorization: import.meta.env.VITE_IPFS_JWT,
+        },
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(`Upload failed: ${error.error || 'Unknown error'}`);
+      }
+
+      const data = await res.json();
+      const ipfsHash = data.IpfsHash;
+      console.log(data);
+      const ipfsUrl = `https://ipfs.io/ipfs/${ipfsHash}`;
+      
+      return {
+        cid: ipfsHash,
+        url: ipfsUrl
+      };
+    } catch (error) {
+      console.error("Error uploading to IPFS:", error);
+      throw error;
+    }
+  }
+
+  const publishPost = async(filename = "post.html") => {
     if (!title || !content || !banner) {
       toast.error("Please fill in all fields");
       return;
     }
     setPublishing(true);
-    setTimeout(() => {
+
+    try {
+      // Upload banner image to IPFS
+      const imageResult = await uploadImageToIPFS(banner);
+      setPublishedBannerUrl(imageResult.url);
+      
+      // Upload content to IPFS
+      const url = "https://api.pinata.cloud/pinning/pinFileToIPFS";
+      const blob = new Blob([content], { type: "text/html" });
+
+      const formData = new FormData();
+      formData.append("file", blob, filename);
+
+      const response = await axios.post(url, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: import.meta.env.VITE_IPFS_JWT,
+        },
+      });
+
+      if (response.status === 200) {
+        const cid = response.data.IpfsHash;
+        const contentUrl = `https://ipfs.io/ipfs/${cid}`;
+        setPublishedUrl(contentUrl);
+        
+        setTimeout(() => {
+          setPublishing(false);
+          setTitle("");
+          setContent("");
+          setBanner(null);
+          toast.success("Post published successfully");
+        }, 1000);
+      } else {
+        throw new Error("IPFS upload failed.");
+      }
+    } catch (err) {
+      console.error("Upload failed:", err.response?.data || err.message);
       setPublishing(false);
-      setTitle("");
-      setContent("");
-      setBanner(null);
-      toast.success("Post published successfully");
-    }, 1000);
+      toast.error("Failed to publish post");
+    }
+  };
+
+  const confirmAnalyze = async () => {
+    setAiAnalyze(true);
+    try {
+      const response = await fetch("http://localhost:1234/api/v0/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemma-3-1b", // Replace with the model identifier from LM Studio
+          messages: [{ role: "user", content:`${content} Based on the blog post (content). Remove all grammatical errors and make it less flawed and more engaging. Just return the optimized content, no other text. Make sure to add needed tags to the content` }],
+          temperature: 0.7,
+        }),
+      });
+
+      const data = await response.json();
+      console.log(data);
+      setOptimizedContent(data.choices[0].message.content);
+      setConfirmAnalyzeOpen(false);
+      setOptimizedContentOpen(true);
+      setAiAnalyze(false);
+    } catch (error) {
+      setAiAnalyze(false);
+      console.error("Error sending request to LM Studio:", error);
+      throw error;
+    }
+    };
+
+  const copyOptimizedContent = () => {
+    navigator.clipboard.writeText(optimizedContent);
+    toast.success("Optimized content copied to clipboard");
   };
 
   return (
@@ -82,16 +200,39 @@ const CreatePost = () => {
             onChange={setContent}
             setOptions={{
               buttonList: [
-                ["undo", "redo", "bold", "underline", "italic", "fontSize", "fontColor", "align", "list", "link", "image", "codeView"],
-              ],
+                ['undo', 'redo'],
+                ['font', 'fontSize', 'formatBlock'],
+                ['paragraphStyle', 'blockquote'],
+                ['bold', 'underline', 'italic'],
+                ['fontColor', 'hiliteColor'],
+                ['align', 'list', 'indent', 'outdent'],
+                ['link'],
+                ['fullScreen', 'showBlocks']
+              ]
             }}
+            
           />
+        </div>
+
+        <div className="flex justify-between">
+
+        {/* AI Analyze Button */}
+        <div className="flex justify-end gap-2">
+            <button
+              disabled={publishing || aiAnalyze}
+                onClick={() => content.length === 0 ? toast.error("Post can't be empty") : content.length < 100 ? toast.error("At least 100 words is needed to run AI Analysis") : setConfirmAnalyzeOpen(true)}
+              className="w-fit flex items-center gap-2 cursor-pointer text-center bg-[#9e74eb] hover:opacity-90 text-white px-6 py-3 rounded-xl transition duration-300 shadow-md"
+            >
+                  <span className="text-sm">AI Analyze</span>
+                  <GiArtificialIntelligence className="w-5 h-5" />
+            </button>
+
         </div>
 
         {/* Preview Button */}
         <div className="flex justify-end gap-2">
             <button
-              disabled={publishing}
+              disabled={publishing || aiAnalyze}
                 onClick={() => setPreviewOpen(true)}
               className="w-fit flex items-center gap-2 cursor-pointer text-center bg-gray-400 hover:opacity-90 text-white px-6 py-3 rounded-xl transition duration-300 shadow-md"
             >
@@ -100,7 +241,7 @@ const CreatePost = () => {
             </button>
 
             <button
-              disabled={publishing}
+              disabled={publishing || aiAnalyze}
               onClick={() => publishPost()}
               className="w-fit flex items-center gap-2 cursor-pointer text-center bg-[#9e74eb] hover:opacity-90 text-white px-6 py-3 rounded-xl transition duration-300 shadow-md"
             >
@@ -113,6 +254,8 @@ const CreatePost = () => {
                 </>
               )}
               </button>
+        </div>
+
         </div>
       </div>
 
@@ -166,8 +309,115 @@ const CreatePost = () => {
           </div>
         </Dialog>
       </Transition>
+
+      {/* Confirm AI Analyze Modal */}
+      <Transition appear show={confirmAnalyzeOpen} as={React.Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={() => setConfirmAnalyzeOpen(false)}>
+          <Transition.Child
+            as={React.Fragment}
+            enter=""
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black opacity-40 backdrop-blur-sm" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 flex items-center justify-center p-6">
+            <Transition.Child
+              as={React.Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <Dialog.Panel className="bg-white rounded-2xl max-w-md w-full shadow-2xl p-6">
+                <Dialog.Title className="text-2xl font-bold mb-4 text-gray-800">Confirm AI Analysis</Dialog.Title>
+                <p className="text-gray-600 mb-6">Are you sure you want to proceed with AI analysis? This may take a few moments.</p>
+                <div className="flex justify-end gap-3">
+                  <button
+                    disabled={aiAnalyze}
+                    onClick={() => setConfirmAnalyzeOpen(false)}
+                    className="w-fit flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer text-center bg-gray-400 hover:opacity-90 text-white px-6 py-2 rounded-xl transition duration-300 shadow-md"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    disabled={aiAnalyze}
+                    onClick={confirmAnalyze}
+                    className="w-fit flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer text-center bg-[#9e74eb] hover:opacity-90 text-white px-6 py-2 rounded-xl transition duration-300 shadow-md"
+                  >
+                    {aiAnalyze ? (
+                      <VscLoading className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <>
+                        <span className="text-sm">Analyze</span>
+                      </>
+                    )}
+                    </button>
+                </div>
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
+        </Dialog>
+      </Transition>
+
+      {/* Optimized Content Modal */}
+      <Transition appear show={optimizedContentOpen} as={React.Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={() => setOptimizedContentOpen(false)}>
+          <Transition.Child
+            as={React.Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black opacity-40 backdrop-blur-sm" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 flex items-center justify-center p-6">
+            <Transition.Child
+              as={React.Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <Dialog.Panel className="bg-white rounded-2xl max-w-4xl w-full shadow-2xl p-6">
+                <Dialog.Title className="text-2xl font-bold mb-4 text-center text-gray-800">Optimized Content</Dialog.Title>
+                <div
+                  className="prose max-w-none prose-blue prose-img:rounded-xl mb-6"
+                  dangerouslySetInnerHTML={{ __html: optimizedContent }}
+                />
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={copyOptimizedContent}
+                    className="w-fit flex items-center gap-2 cursor-pointer text-center bg-[#9e74eb] hover:opacity-90 text-white px-6 py-3 rounded-xl transition duration-300 shadow-md"
+                  >
+                    Copy
+                  </button>
+                  <button
+                    onClick={() => setOptimizedContentOpen(false)}
+                    className="w-fit flex items-center gap-2 cursor-pointer text-center bg-gray-400 hover:opacity-90 text-white px-6 py-3 rounded-xl transition duration-300 shadow-md"
+                  >
+                    Close
+                  </button>
+                </div>
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
+        </Dialog>
+      </Transition>
     </div>
   );
 };
 
-  export default CreatePost;
+export default CreatePost;
