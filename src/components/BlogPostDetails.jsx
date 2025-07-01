@@ -4,14 +4,15 @@ import { PostsContext } from '../context/PostsContext';
 import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import { TiPi } from 'react-icons/ti';
 import { GiMoneyStack } from 'react-icons/gi';
-import NFT1 from "../assets/NFTs/NFT1.png";
 import TipModal from './TipModal';
 import darkMarket from "../assets/icons/darkMarket.svg";
 import PromptModal from './PromptModal';
+import { useAccount, useBalance } from 'wagmi';
+import EthModal from './BuySellModal';
 
 const BlogPostDetails = () => {
+  const { address, isConnected } = useAccount();
   const { forYouPosts } = useContext(PostsContext);
   const { id } = useParams();
   const navigate = useNavigate();
@@ -23,6 +24,29 @@ const BlogPostDetails = () => {
   const [isRemoveFromSaleModalOpen, setIsRemoveFromSaleModalOpen] = useState(false);
 
   const post = forYouPosts.find((post) => post.id === Number(id));
+  const { data: ethBalance } = useBalance({
+    address: address,
+  })
+
+  const coinDetails = {
+    caller: "0x1b6e16403b06a51C42Ba339E356a64fE67348e92",
+    payoutRecipient: "0x1b6e16403b06a51C42Ba339E356a64fE67348e92",
+    platformReferrer: "0x1b6e16403b06a51C42Ba339E356a64fE67348e92",
+    currency: "0x0000000000000000000000000000000000000000",
+    uri: "ipfs://QmQrmSrkhzzRtkqWRRbTwoMY5DM4PpwCQRa4DTByqoc6Ae",
+    name: "Port Harcourt City",
+    symbol: "PHC",
+    coin: "0xabAc1Aad7123A3431529598f2624273454A73D3d",
+    poolKey: {
+      currency0: "0x0000000000000000000000000000000000000000",
+      currency1: "0xabAc1Aad7123A3431529598f2624273454A73D3d",
+      fee: 20000,
+      tickSpacing: 200,
+      hooks: "0xD7A343d20e4C8E9725416c5f1cfaAeD749d49040",
+      poolKeyHash: "0xbaab19aab1c86c08cc574d8216d74459886c99aa99670a09061e8071000d228b",
+      version: "1.0.0"
+    }
+    }
 
 
   if (!post?.id) {
@@ -94,31 +118,45 @@ const BlogPostDetails = () => {
             <span>{post?.date}</span>
           </div>
 
-          {post?.username !== "@undefined" && (
             <div className="flex items-center w-full">
-              {post?.forSale && (
                 <div className="w-full flex justify-end">
                   <button
                     onClick={() => setIsPurchaseModalOpen(true)}
                   className="w-fit flex items-center gap-2 cursor-pointer text-center bg-[#9e74eb] hover:opacity-90 text-white px-6 py-3 rounded-xl transition duration-300 shadow-md"
                 >
-                  <span className="text-sm">Purchase Content</span>
+                  <span className="text-sm">Purchase Coins</span>
                   <img src={darkMarket} alt="" className="w-5 h-5" />
                 </button>
               </div>
-              )}
-              <div className="w-full flex justify-end">
-                <button
-                  onClick={() => setIsModalOpen(true)}
-                  className="w-fit flex items-center gap-2 cursor-pointer text-center bg-[#9e74eb] hover:opacity-90 text-white px-6 py-3 rounded-xl transition duration-300 shadow-md"
-                >
-                  <span className="text-sm">Tip Content</span>
-                  <GiMoneyStack className="w-5 h-5" />
-                </button>
+
+              {post?.username !== "@undefined" && (
+              <div className="flex items-center w-full">
+                {/* {post?.forSale && (
+                  <div className="w-full flex justify-end">
+                    <button
+                      onClick={() => setIsPurchaseModalOpen(true)}
+                    className="w-fit flex items-center gap-2 cursor-pointer text-center bg-[#9e74eb] hover:opacity-90 text-white px-6 py-3 rounded-xl transition duration-300 shadow-md"
+                  >
+                    <span className="text-sm">Purchase Content</span>
+                    <img src={darkMarket} alt="" className="w-5 h-5" />
+                  </button>
+                </div>
+                )} */}
+                <div className="w-full flex justify-end">
+                  <button
+                    onClick={() => isConnected ? setIsModalOpen(true) : toast.error('Please connect your wallet to tip content')}
+                    className="w-fit flex items-center gap-2 cursor-pointer text-center bg-[#9e74eb] hover:opacity-90 text-white px-6 py-3 rounded-xl transition duration-300 shadow-md"
+                  >
+                    <span className="text-sm">Tip Creator</span>
+                    <GiMoneyStack className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
+            )}
+
             </div>
-          )}
-          {post?.username === "@undefined" && (
+
+          {/* {post?.username === "@undefined" && (
             <div className="flex items-center w-full">
               {post?.forSale ? (
                 <div className="w-full flex justify-end">
@@ -142,7 +180,7 @@ const BlogPostDetails = () => {
                 </div>
               )}
             </div>
-          )}
+          )} */}
         </div>
 
         <div>
@@ -169,16 +207,18 @@ const BlogPostDetails = () => {
         amount={amount}
         setAmount={setAmount}
       />
-      <PromptModal
-        isOpen={isPurchaseModalOpen}
-        heading="Purchase Blog Post"
-        description={`Purchase the blog post for ${post?.amount} Zoro. After purchase, all new tips will be sent to your wallet.`}
-        handleAction={handlePurchase}
-        onClose={() => setIsPurchaseModalOpen(false)}
-        type="purchase"
-        loading={loading}
-        setLoading={setLoading}
-      />
+
+      {isPurchaseModalOpen && (
+        <EthModal
+          ethBalance={ethBalance?.formatted?.slice(0, 7)}
+          onSell={handlePurchase}
+          onBuy={handlePurchase}
+          onClose={() => setIsPurchaseModalOpen(false)}
+          loading={loading}
+          setLoading={setLoading}
+          coinDetails={coinDetails}
+        />
+      )}
       <PromptModal
         isOpen={isRemoveFromSaleModalOpen}
         heading="Remove Post From Sale"

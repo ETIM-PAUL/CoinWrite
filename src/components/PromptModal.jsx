@@ -76,9 +76,6 @@ const PurchaseModal = ({ isOpen, onClose, loading, setLoading, heading, descript
                     {type === "purchase" && (
                       <img src={darkMarket} alt="" className="w-5 h-5" />
                     )}
-                    {type === "purchase" && (
-                      <img src={darkMarket} alt="" className="w-5 h-5" />
-                    )}
                   </button>
                 </div>
               </Dialog.Panel>

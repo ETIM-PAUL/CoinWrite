@@ -81,21 +81,6 @@ const TopHeader = () => {
           <SideBarItem title="My wallet" lightIcon={Wallet} darkIcon={WalletDark} link="my-wallet" />
           <SideBarItem title="Settings" lightIcon={Setting} darkIcon={SettingDark} link="settings" />
         </div>
-        <div className="mb-2 px-3">
-          <div className="flex gap-3 items-center">
-            <span className="font-medium text-gray-800 dark:text-gray-200">Dark mode</span>
-            <div className="flex items-center gap-2">
-              <HiSun
-                className="text-yellow-500 text-2xl cursor-pointer"
-                onClick={() => dispatch(themeStatus("light"))}
-              />
-              <HiMoon
-                className="text-blue-400 text-xl cursor-pointer"
-                onClick={() => dispatch(themeStatus("dark"))}
-              />
-            </div>
-          </div>
-        </div>
       </div>
     </nav>
   );

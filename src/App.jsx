@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
-import { ArrowRightIcon } from 'lucide-react'
 import LandingPage from './pages/landing.jsx'
 import DashboardPage from './pages/Dashboard.jsx'
 import Register from './pages/Register.jsx'

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import SunEditor from "suneditor-react";
 import "suneditor/dist/css/suneditor.min.css";
 import { Dialog, Transition } from "@headlessui/react";
@@ -8,10 +8,27 @@ import { VscLoading } from "react-icons/vsc";
 import { GiArtificialIntelligence } from "react-icons/gi";
 // import { LMStudioClient } from "@lmstudio/sdk";
 import axios from "axios";
+import { createCoin, DeployCurrency, getCoinCreateFromLogs } from "@zoralabs/coins-sdk";
+import { createWalletClient, createPublicClient, http, parseEther } from "viem";
+import { baseSepolia, base, thaiChain } from "viem/chains";
+import { useAccount, useWaitForTransactionReceipt } from "wagmi";
+import { useNavigate } from "react-router-dom";
+import { createCoinCall } from "@zoralabs/coins-sdk";
+import { useWriteContract, useSimulateContract, usePublicClient } from "wagmi";
+import { getProfileBalances } from "@zoralabs/coins-sdk";
+import { waitForTransactionReceipt } from "viem/actions";
+
+const categories = [
+  "Tech", "Finance", "Art", "Culture", "Web3", "Gaming", "Education",
+  "Science","Health", "Travel","Food", "Entertainment", "Music",
+  "Movies", "Sports", "Politics", "Economy"
+];
 
 const CreatePost = () => {
   const [title, setTitle] = useState("");
   const [banner, setBanner] = useState(null);
+  const [category, setCategory] = useState(null);
+  const [symbol, setSymbol] = useState("");
   const [content, setContent] = useState("");
   const [previewOpen, setPreviewOpen] = useState(false);
   const [publishing, setPublishing] = useState(false);
@@ -21,6 +38,14 @@ const CreatePost = () => {
   const [confirmAnalyzeOpen, setConfirmAnalyzeOpen] = useState(false);
   const [optimizedContentOpen, setOptimizedContentOpen] = useState(false);
   const [optimizedContent, setOptimizedContent] = useState("");
+  const { address, isConnected } = useAccount()
+  const publicClient = usePublicClient();
+  const navigate = useNavigate()
+  
+  if (!isConnected) {
+    toast.error("Please connect your wallet");
+    navigate("/collection");
+  }
   // const client = new LMStudioClient();
   
   const handleImageChange = (e) => {
@@ -59,38 +84,51 @@ const CreatePost = () => {
       }
 
       const data = await res.json();
-      const ipfsHash = data.IpfsHash;
-      console.log(data);
-      const ipfsUrl = `https://ipfs.io/ipfs/${ipfsHash}`;
-      
-      return {
-        cid: ipfsHash,
-        url: ipfsUrl
-      };
+      setPublishedBannerUrl(`ipfs://${data?.IpfsHash}`)
+      return data
     } catch (error) {
       console.error("Error uploading to IPFS:", error);
       throw error;
     }
   }
 
-  const publishPost = async(filename = "post.html") => {
-    if (!title || !content || !banner) {
+  // Setup contract write hook
+  const { data:hash, writeContractAsync, status, error } = useWriteContract();
+  
+
+  const publishPost = async(filename = "metadata.json") => {
+    if (!title || !content || !banner || !symbol) {
       toast.error("Please fill in all fields");
+      return;
+    }
+    if (symbol.length > 5) {
+      toast.error("Symbol must be less than 5 characters");
       return;
     }
     setPublishing(true);
 
     try {
       // Upload banner image to IPFS
-      const imageResult = await uploadImageToIPFS(banner);
-      setPublishedBannerUrl(imageResult.url);
+      const imageUrl = await uploadImageToIPFS(banner);
       
       // Upload content to IPFS
       const url = "https://api.pinata.cloud/pinning/pinFileToIPFS";
-      const blob = new Blob([content], { type: "text/html" });
+
+      // Create metadata JSON
+      const metadata = {
+        name: title,
+        description: content,
+        image: "ipfs://" + imageUrl.IpfsHash,
+        properties: {
+          category: "social"
+        }
+      };
+
+      const blob = new Blob([JSON.stringify(metadata)], { type: "application/json" });
 
       const formData = new FormData();
       formData.append("file", blob, filename);
+
 
       const response = await axios.post(url, formData, {
         headers: {
@@ -99,25 +137,67 @@ const CreatePost = () => {
         },
       });
 
+
       if (response.status === 200) {
         const cid = response.data.IpfsHash;
         const contentUrl = `https://ipfs.io/ipfs/${cid}`;
         setPublishedUrl(contentUrl);
-        
-        setTimeout(() => {
+
+
+        if (writeContractAsync) {
+          const coinParams = {
+            name: title,
+            symbol: symbol,
+            uri: `ipfs://${cid}`,
+            payoutRecipient: address,
+            platformReferrer:address,
+            initialPurchaseWei: parseEther("0"),
+            chainId: baseSepolia.id, // Optional: defaults to base.id
+            currency: DeployCurrency.ETH, // Optional: ZORA or ETH
+          };
+          const params = await createCoinCall(coinParams);
+
+          const tx = await writeContractAsync(params);
+          console.log('Transaction hash:', tx);
+
+          if (!tx) throw new Error('Transaction hash is undefined');
+
+          const receipt = await publicClient.waitForTransactionReceipt({
+            hash: tx,
+            confirmations:1,
+            timeout: 60_000 // e.g., Base Sepolia
+          })
+
+          console.log("Receipt:", receipt);
+
+
+          const coinDeployment = getCoinCreateFromLogs(receipt);
+            console.log("Deployed coin address:", coinDeployment);
+
+          // console.log('Confirmed receipt:', receipt);
+          if (error) {
+            console.error("Error creating coin:", error);
+            toast.error((error.shortMessage || error.message));
+            setPublishing(false);
+            return;
+          } 
+
+          toast.success("Post and coin created successfully!");
+          // Reset form
           setPublishing(false);
           setTitle("");
           setContent("");
           setBanner(null);
-          toast.success("Post published successfully");
-        }, 1000);
+          setSymbol("");
+          setCategory("");
+        }
       } else {
         throw new Error("IPFS upload failed.");
       }
-    } catch (err) {
-      console.error("Upload failed:", err.response?.data || err.message);
+    } catch (error) {
+      console.error("Error creating coin:", error);
+      toast.error("Failed to create coin");
       setPublishing(false);
-      toast.error("Failed to publish post");
     }
   };
 
@@ -147,12 +227,41 @@ const CreatePost = () => {
       console.error("Error sending request to LM Studio:", error);
       throw error;
     }
-    };
+  };
 
   const copyOptimizedContent = () => {
     navigator.clipboard.writeText(optimizedContent);
     toast.success("Optimized content copied to clipboard");
   };
+
+  async function fetchUserBalances() {
+    const response = await getProfileBalances({
+      identifier: address, // Can also be zora user profile handle
+      count: 20,        // Optional: number of balances per page
+      after: undefined, // Optional: for pagination
+    });
+
+    console.log("response", response);
+   
+    const profile = response.data?.profile;
+    
+    console.log(`Found ${profile.coinBalances?.length || 0} coin balances`);
+    
+    profile.coinBalances?.forEach((balance, index) => {
+      console.log(balance)
+    });
+    
+    // For pagination
+    if (profile.coinBalances?.pageInfo?.endCursor) {
+      console.log("Next page cursor:", profile.coinBalances?.pageInfo?.endCursor);
+    }
+    
+    return response;
+  }
+
+  useEffect(() => {
+    fetchUserBalances();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white to-blue-50 py-10 px-6 md:px-16">
@@ -164,10 +273,33 @@ const CreatePost = () => {
         <input
           type="text"
           placeholder="Enter blog title"
-          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-lg"
+          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
+
+        {/* Coin Symbol Input */}
+        <label className="block text-sm font-medium text-gray-600">Coin Symbol</label>
+        <input
+          type="text"
+          placeholder="Enter coin symbol"
+          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+          value={symbol}
+          onChange={(e) => setSymbol(e.target.value)}
+        />
+
+
+        {/* Category Input */}
+        <label className="block text-sm font-medium text-gray-600">Post Category</label>
+        <select
+          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+        >
+          {categories.map((category) => (
+            <option value={category}>{category}</option>
+          ))}
+        </select>
 
         {/* Banner Image Upload */}
         <div className="space-y-2">
@@ -241,7 +373,7 @@ const CreatePost = () => {
             </button>
 
             <button
-              disabled={publishing || aiAnalyze}
+              disabled={aiAnalyze}
               onClick={() => publishPost()}
               className="w-fit flex items-center gap-2 cursor-pointer text-center bg-[#9e74eb] hover:opacity-90 text-white px-6 py-3 rounded-xl transition duration-300 shadow-md"
             >

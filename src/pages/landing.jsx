@@ -156,7 +156,7 @@ function LandingPage() {
                         </div>
                     ))}
                   </div>
-                  <button className="bg-[#9e74eb] text-white px-4 py-2 rounded-md w-full text-sm font-medium hover:opacity-90">Select</button>
+                  <button className="bg-[#9e74eb] cursor-pointer text-white px-4 py-2 rounded-md w-full text-sm font-medium hover:opacity-90">Select</button>
                 </div>
               ))}
             </div>
