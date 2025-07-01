@@ -16,7 +16,7 @@ contract CoinWrite {
       string username;
       SubscriptionTier subscription_tier;
       string[] interests;
-      uint256 subscription_start_time;
+      uint256 last_subscribed_at;
     }
 
     struct RegisterUserParams {
@@ -27,13 +27,17 @@ contract CoinWrite {
 
     enum SubscriptionTier {
       PayAsYouGo, // 0.1 ETH per post (max == MAX_UINT)
-      Creator // 0.01 ETH per month
+      Basic, // 0.002 ETH per month
+      Premium // 0.005 ETH per month
     }
     mapping(address => Coin[]) public creator_coins;
     mapping(address => User) public user_details;
     Coin[] public all_coins;
     User[] public all_users;
     address public coin_admin;
+    uint256 public immutable BASIC_CREATOR_SUB_AMOUNT = 2*10**15; // 0.002 ETH per month
+    uint256 public immutable PREMIUM_CREATOR_SUB_AMOUNT = 5*10**15; // 0.005 ETH per month
+    uint256 public constant THIRTY_DAYS_IN_SECONDS = 30*24*60*60;
 
     modifier onlyAdmin {
       require(msg.sender == coin_admin, "CoinWrite: NOT_ADMIN");
@@ -43,6 +47,7 @@ contract CoinWrite {
     event AdminUpdated(address admin, address previous_admin);
     event UserRegistered(User user);
     event CoinDetailsStored(Coin coin);
+    event CreatorSubscriptionAmountUpdated(uint256 current_amount, uint256 previous_amount);
 
     constructor() {
       coin_admin = msg.sender;
@@ -54,12 +59,21 @@ contract CoinWrite {
       emit AdminUpdated(coin_admin, msg.sender);
     }
 
-    function registerUser(RegisterUserParams calldata _params) public {
+    function registerUser(RegisterUserParams calldata _params) public payable {
+      if (_params.subscription_tier == SubscriptionTier.Basic) {
+        require(msg.value == BASIC_CREATOR_SUB_AMOUNT, "CoinWrite: INSUFFICIENT_SUBSCRIPTION_AMOUNT-Basic");
+      }
+      else if (_params.subscription_tier == SubscriptionTier.Premium) {
+        require(msg.value == PREMIUM_CREATOR_SUB_AMOUNT, "CoinWrite: INSUFFICIENT_SUBSCRIPTION_AMOUNT-Premium");
+      }
+      else {
+        revert("CoinWrite: INVALID_SUBSCRIPTION_TIER");
+      }
       User memory new_user = User({
         username: _params.username,
         subscription_tier: _params.subscription_tier,
         interests: _params.interests,
-        subscription_start_time: block.timestamp
+        last_subscribed_at: block.timestamp
       });
       user_details[msg.sender] = new_user;
       all_users.push(new_user);
@@ -80,6 +94,12 @@ contract CoinWrite {
 
     function getUserDetails(address user) public view returns (User memory) {
       return user_details[user];
+    }
+
+    function checkSubscriptionStatus(address _user) public view returns (bool) {
+      User memory creator = user_details[_user];
+      uint256 time_diff = block.timestamp - creator.last_subscribed_at;
+      return time_diff < THIRTY_DAYS_IN_SECONDS;
     }
 
     function _validateCoin(Coin calldata _coin) internal pure returns (bool) {
