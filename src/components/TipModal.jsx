@@ -1,10 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { toast } from 'react-toastify';
+import { getOnchainCoinDetails } from "@zoralabs/coins-sdk";
+import { createPublicClient, http } from "viem";
+import { baseSepolia } from "viem/chains";
 
-const TipModal = ({ isOpen, onClose }) => {
+const TipModal = ({coinDetails, address, isOpen, onClose }) => {
   const [amount, setAmount] = useState('');
   const [tipping, setTipping] = useState(false);
+
+  const publicClient = createPublicClient({
+    chain: baseSepolia,
+    transport: http('https://base-sepolia.drpc.org'),
+  });
 
   const handleTip = () => {
     setTipping(true);
@@ -14,6 +22,32 @@ const TipModal = ({ isOpen, onClose }) => {
       onClose();
     }, 1000);
   };
+
+   
+async function fetchCoinDetails() {
+  const details = await getOnchainCoinDetails({
+    coin: coinDetails?.coin,
+    user: address, // Optional: to get user's balance
+    publicClient
+  });
+  
+  console.log("Coin market cap:", details);
+  console.log("Coin liquidity:", details.liquidity);
+  console.log("Coin pool address:", details.pool);
+  console.log("Coin owners:", details.owners);
+  console.log("Payout recipient:", details.payoutRecipient);
+  
+  if (details.balance) {
+    console.log("User balance:", details.balance);
+  }
+  
+  return details;
+}
+
+useEffect(() => {
+  fetchCoinDetails();
+}, []);
+
   return (
     <Transition appear show={isOpen} as={React.Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>

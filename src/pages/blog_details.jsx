@@ -6,7 +6,6 @@ import BlogPostDetails from '../components/BlogPostDetails';
 
 const BlogDetails = () => {
     const { id } = useParams();
-    console.log(id);
 
   return (
     <div>

@@ -190,6 +190,8 @@ const BlogPostDetails = () => {
 
       {/* Tip Modal */}
       <TipModal
+      coinDetails={coinDetails}
+      address={address}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />

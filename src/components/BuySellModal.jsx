@@ -1,7 +1,9 @@
 import React, { useState } from "react";
-import { parseEther } from "ethers";
+// import { parseEther } from "ethers";
 import { usePublicClient } from "wagmi";
 // import { simulateBuy } from "@zoralabs/coins-sdk";
+// import { Token, ChainId, CurrencyAmount, Ether } from '@uniswap/sdk-core';
+// import { Pool, Position, SwapPlanner } from '@uniswap/v4-sdk';
 
 export default function EthModal({ ethBalance, onBuy, onSell, onClose, loading, setLoading, coinDetails }) {
   const [tab, setTab] = useState("BUY");
@@ -19,18 +21,27 @@ export default function EthModal({ ethBalance, onBuy, onSell, onClose, loading, 
     }
   };
 
-  async function simulateCoinBuy(amount) {
-    const simulation = await simulateBuy({
-      target: coinDetails?.coin,
-      requestedOrderSize: parseEther(amount.toString()),
-      publicClient,
-    });
-    
-    console.log("Order size", simulation.orderSize);
-    console.log("Amount out", simulation.amountOut);
-    
-    return simulation;
-  }
+//   async function simulateCoinBuy(amount) {
+//     const provider = publicClient;
+//     const VAULT_ADDRESS = "0xFC885F37B5A9FA8159c8dBb907fc1b0C2fB31323";
+//     const UNIVERSAL_ROUTER_ADDRESS = "0x95273d871C8156636E114B63797d78D7E1720d81";
+//     const planner = new SwapPlanner({ provider, vault: VAULT_ADDRESS, universalRouter: UNIVERSAL_ROUTER_ADDRESS });
+//     const amountIn = CurrencyAmount.fromRawAmount(coinDetails?.poolKey?.currency0, amount); // 0.01 WETH
+
+//     const plan = await planner.plan({
+//     tokenIn: coinDetails?.poolKey?.currency0,
+//     tokenOut: coinDetails?.poolKey?.currency1,
+//     amountSpecified: amountIn.quotient,
+//     exactIn: true,
+//     options: {
+//         slippageTolerance: "0.5",
+//         deadline: Math.floor(Date.now() / 1000) + 60 * 10,
+//         hookData: '0x' // optional hookData for early-buyer logic
+//     }
+//     });
+//     console.log('Expected POST received1:', plan);
+//     console.log('Expected POST received2:', plan.amountOut.toSignificant());
+//   }
 
   const isDisabled = parseFloat(amount) > parseFloat(ethBalance);
 

@@ -8,15 +8,14 @@ import { VscLoading } from "react-icons/vsc";
 import { GiArtificialIntelligence } from "react-icons/gi";
 // import { LMStudioClient } from "@lmstudio/sdk";
 import axios from "axios";
-import { createCoin, DeployCurrency, getCoinCreateFromLogs } from "@zoralabs/coins-sdk";
-import { createWalletClient, createPublicClient, http, parseEther } from "viem";
-import { baseSepolia, base, thaiChain } from "viem/chains";
-import { useAccount, useWaitForTransactionReceipt } from "wagmi";
+import { DeployCurrency, getCoinCreateFromLogs } from "@zoralabs/coins-sdk";
+import {parseEther } from "viem";
+import { baseSepolia } from "viem/chains";
+import { useAccount } from "wagmi";
 import { useNavigate } from "react-router-dom";
 import { createCoinCall } from "@zoralabs/coins-sdk";
-import { useWriteContract, useSimulateContract, usePublicClient } from "wagmi";
+import { useWriteContract, usePublicClient } from "wagmi";
 import { getProfileBalances } from "@zoralabs/coins-sdk";
-import { waitForTransactionReceipt } from "viem/actions";
 
 const categories = [
   "Tech", "Finance", "Art", "Culture", "Web3", "Gaming", "Education",
