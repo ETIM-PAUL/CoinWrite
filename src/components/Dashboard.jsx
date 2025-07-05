@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import NFT1 from "../assets/NFTs/NFT1.png";
 import NFT2 from "../assets/NFTs/NFT2.png";
 import NFT3 from "../assets/NFTs/NFT3.png";
@@ -38,6 +38,132 @@ const FilterValue = ({ value, setFilter, filter }) => {
 
 const Dashboard = () => {
   const [filter, setFilter] = useState("Art");
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate loading delay
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 5000); // 5 seconds delay
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const SkeletonDashboard = () => (
+    <div className="flex">
+      <div className="h-screen overflow-y-scroll space-y-10 w-9/12 px-3 mt-4 pb-5 bg-white rounded-md">
+        {/* Top Posts Skeleton */}
+        <section className="p-3">
+          <div className="w-full text-sm flex justify-between">
+            <div className="h-5 w-32 bg-gray-200 rounded animate-pulse"></div>
+            <div className="h-5 w-20 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+          
+          {/* Filter Skeleton */}
+          <div className="w-full flex gap-3 mt-3">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="w-1/6 h-8 bg-gray-200 rounded-lg animate-pulse"></div>
+            ))}
+          </div>
+
+          {/* NFT Cards Skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="py-2 px-2 bg-white rounded-lg shadow">
+                <div className="w-full h-48 bg-gray-200 rounded animate-pulse"></div>
+                <div className="flex justify-between my-2 items-center">
+                  <div className="flex gap-2 items-center">
+                    <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse"></div>
+                    <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+                  </div>
+                  <div className="h-4 w-20 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+                <div className="h-10 w-full bg-gray-200 rounded-lg mt-3 animate-pulse"></div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Top Creators Skeleton */}
+        <section className="p-3">
+          <div className="w-full text-sm flex justify-between">
+            <div className="h-5 w-32 bg-gray-200 rounded animate-pulse"></div>
+            <div className="h-5 w-20 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+          <div className="py-2 px-2 mt-3 flex w-full bg-white rounded-lg shadow">
+            <div className="flex w-full flex-wrap justify-between my-2 items-center gap-2">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="flex items-center gap-2 w-64">
+                  <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse"></div>
+                  <div className="grid gap-1">
+                    <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+                    <div className="h-3 w-16 bg-gray-200 rounded animate-pulse"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Categories Table Skeleton */}
+        <section className="px-3 pt-3 pb-24">
+          <div className="w-full text-sm flex justify-between">
+            <div className="h-5 w-32 bg-gray-200 rounded animate-pulse"></div>
+            <div className="h-5 w-20 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+          <div className="py-2 px-2 mt-3 flex w-full bg-white rounded-lg shadow">
+            <table className="w-full">
+              <thead>
+                {[1].map((i) => (
+                  <tr key={i} className="border-b border-gray-200">
+                    {[1, 2, 3, 4].map((j) => (
+                      <th key={j} className="px-4 py-2">
+                        <div className="h-4 w-20 bg-gray-200 rounded animate-pulse"></div>
+                      </th>
+                    ))}
+                  </tr>
+                ))}
+              </thead>
+              <tbody>
+                {[1, 2, 3].map((i) => (
+                  <tr key={i}>
+                    {[1, 2, 3, 4].map((j) => (
+                      <td key={j} className="px-4 py-2">
+                        <div className="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      {/* Side Panel Skeleton */}
+      <div className="w-3/12 min-h-screen bg-white rounded-md mt-4 shadow-lg p-4">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <div className="h-6 w-24 bg-gray-200 rounded animate-pulse"></div>
+            <div className="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="flex items-center gap-2">
+              <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse"></div>
+              <div className="space-y-2">
+                <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-3 w-16 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  if (isLoading) {
+    return <SkeletonDashboard />;
+  }
 
   return (
     <div className="flex">

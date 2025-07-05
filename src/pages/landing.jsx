@@ -8,6 +8,13 @@ import everything from "../assets/everything_goes.jpg"; // Replace with actual h
 import time from "../assets/time_now.png"; // Replace with actual hero image path
 import three from "../assets/three_crazy_friends.png"; // Replace with actual hero image path
 import HomePageHeader from "../components/HomePageHeader";
+import { useAccount } from "wagmi";
+import { toast } from "react-toastify";
+import { useWeb3Modal } from "@web3modal/wagmi/react";
+import { useNavigate } from "react-router-dom";
+import RegisterModal from '../components/RegisterModal';
+import { plans } from "../components/utils";
+
 const categories = [
   "Tech", "Finance", "Art", "Culture", "Web3", "Gaming", "Education",
   "Science","Health", "Travel","Food", "Entertainment", "Music",
@@ -53,6 +60,22 @@ function LandingPage() {
       author: "Entertainment Studio",
     },
   ]);
+  const { open } = useWeb3Modal()
+  const navigate = useNavigate()
+
+  const { isConnected } = useAccount();
+
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const registerUser = (title) => {
+    if(!isConnected) {
+      toast.error("Please connect your wallet to register");
+    }
+    else {
+      setSelectedPlan(title);
+      setIsRegisterModalOpen(true);
+    }
+  }
 
   return (
       <div className="px-8">
@@ -69,7 +92,7 @@ function LandingPage() {
               <p className="text-gray-600 text-lg whitespace-pre-line break-words text-start">
               CoinWrite lets you mint and monetize content on-chain — share essays, thoughts, or newsletters and earn crypto instantly.
               </p>
-              <button className="w-[200px] cursor-pointer text-center bg-[#9e74eb] hover:opacity-90 text-white px-6 py-3 rounded-xl transition duration-300 shadow-md">
+              <button onClick={() => isConnected ? navigate('/publish_post') : open()} className="w-[200px] cursor-pointer text-center bg-[#9e74eb] hover:opacity-90 text-white px-6 py-3 rounded-xl transition duration-300 shadow-md">
                 <span className="text-sm">Start Earning</span>
                 {/* <ArrowRightIcon className="w-5 h-5 ml-2" /> */}
               </button>
@@ -140,11 +163,7 @@ function LandingPage() {
           <div className="max-w-5xl mx-auto text-center">
             <h3 className="text-2xl font-medium mb-10">Choose Your Plan</h3>
             <div className="grid md:grid-cols-2 gap-8">
-              {[
-                // { title: 'Starter', price: '$8/mo', features: ['Post Banner, Text Editor', '20 Posts/Month', '2000 words/post'] },
-                { title: 'Pay as You Go', price: '$5/post', features: ['Post Banner and Text Editor', '$5 per post', '5000 words/post'] },
-                { title: 'Creator +', price: '$100/mo', features: ['Post Banner, Text Editor, and AI Assistant', 'Unlimited Posts', 'Unlimited words/post'] },
-              ].map((plan) => (
+              {plans.map((plan) => (
                 <div key={plan.title} className="bg-white cursor-pointer p-6 text-start rounded-xl border border-gray-200 shadow">
                   <h4 className="text-lg font-normal mb-1">{plan.title}</h4>
                   <p className="text-3xl font-extrabold text-[#9e74eb] mb-4">{plan.price}</p>
@@ -156,7 +175,7 @@ function LandingPage() {
                         </div>
                     ))}
                   </div>
-                  <button className="bg-[#9e74eb] cursor-pointer text-white px-4 py-2 rounded-md w-full text-sm font-medium hover:opacity-90">Select</button>
+                  <button onClick={() => registerUser(plan.title)} className="bg-[#9e74eb] cursor-pointer text-white px-4 py-2 rounded-md w-full text-sm font-medium hover:opacity-90">Select</button>
                 </div>
               ))}
             </div>
@@ -167,6 +186,12 @@ function LandingPage() {
         <footer className="py-10 text-center text-gray-500">
           &copy; 2025 CoinWrite. All rights reserved.
         </footer>
+
+        <RegisterModal 
+          plan={selectedPlan}
+          isOpen={isRegisterModalOpen} 
+          setIsOpen={setIsRegisterModalOpen}
+        />
 
       </div>
 

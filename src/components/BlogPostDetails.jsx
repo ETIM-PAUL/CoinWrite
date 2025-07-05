@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import { ArrowLeftIcon, Calendar, PlusIcon, User } from "lucide-react";
 import { PostsContext } from '../context/PostsContext';
 import { useParams } from 'react-router-dom';
@@ -10,6 +10,11 @@ import darkMarket from "../assets/icons/darkMarket.svg";
 import PromptModal from './PromptModal';
 import { useAccount, useBalance } from 'wagmi';
 import EthModal from './BuySellModal';
+import { getCoin } from '@zoralabs/coins-sdk';
+import { baseSepolia } from 'viem/chains';
+import {formatDate } from './utils';
+import { FaCoins, FaHashtag, FaAddressCard, FaChartLine, FaCubes, FaUsers, FaExchangeAlt, FaHistory, FaExternalLinkAlt, FaUserCircle } from "react-icons/fa";
+import { formatEther } from 'viem';
 
 const BlogPostDetails = () => {
   const { address, isConnected } = useAccount();
@@ -22,36 +27,60 @@ const BlogPostDetails = () => {
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState(0);
   const [isRemoveFromSaleModalOpen, setIsRemoveFromSaleModalOpen] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(true);
+  const [coinDetails, setCoinDetails] = useState(
+    {
+      caller: "0x1b6e16403b06a51C42Ba339E356a64fE67348e92",
+      payoutRecipient: "0x1b6e16403b06a51C42Ba339E356a64fE67348e92",
+      platformReferrer: "0x1b6e16403b06a51C42Ba339E356a64fE67348e92",
+      currency: "0x0000000000000000000000000000000000000000",
+      uri: "ipfs://QmQrmSrkhzzRtkqWRRbTwoMY5DM4PpwCQRa4DTByqoc6Ae",
+      name: "Port Harcourt City",
+      symbol: "PHC",
+      coin: "0xabAc1Aad7123A3431529598f2624273454A73D3d",
+      poolKey: {
+        currency0: "0x0000000000000000000000000000000000000000",
+        currency1: "0xabAc1Aad7123A3431529598f2624273454A73D3d",
+        fee: 20000,
+        tickSpacing: 200,
+        hooks: "0xD7A343d20e4C8E9725416c5f1cfaAeD749d49040",
+        poolKeyHash: "0xbaab19aab1c86c08cc574d8216d74459886c99aa99670a09061e8071000d228b",
+        version: "1.0.0"
+      }
+    }
+  );
+  const [coinAddress, setCoinAddress] = useState("0xabAc1Aad7123A3431529598f2624273454A73D3d");
   const post = forYouPosts.find((post) => post.id === Number(id));
   const { data: ethBalance } = useBalance({
     address: address,
   })
+  
 
-  const coinDetails = {
-    caller: "0x1b6e16403b06a51C42Ba339E356a64fE67348e92",
-    payoutRecipient: "0x1b6e16403b06a51C42Ba339E356a64fE67348e92",
-    platformReferrer: "0x1b6e16403b06a51C42Ba339E356a64fE67348e92",
-    currency: "0x0000000000000000000000000000000000000000",
-    uri: "ipfs://QmQrmSrkhzzRtkqWRRbTwoMY5DM4PpwCQRa4DTByqoc6Ae",
-    name: "Port Harcourt City",
-    symbol: "PHC",
-    coin: "0xabAc1Aad7123A3431529598f2624273454A73D3d",
-    poolKey: {
-      currency0: "0x0000000000000000000000000000000000000000",
-      currency1: "0xabAc1Aad7123A3431529598f2624273454A73D3d",
-      fee: 20000,
-      tickSpacing: 200,
-      hooks: "0xD7A343d20e4C8E9725416c5f1cfaAeD749d49040",
-      poolKeyHash: "0xbaab19aab1c86c08cc574d8216d74459886c99aa99670a09061e8071000d228b",
-      version: "1.0.0"
+
+    async function fetchCoinDetails() {
+      try {
+      const response = await getCoin({
+        address: "0xabAc1Aad7123A3431529598f2624273454A73D3d",
+        chain: baseSepolia?.id
+      });
+      
+      console.log("Coin market cap:", response);
+      if (response?.data?.zora20Token) {
+        setCoinDetails(response?.data?.zora20Token);
+        setIsLoading(false);
+      } else {
+        toast.error("Error fetching coin details");
+      }
+    } catch (error) {
+      console.error("Error fetching coin details:", error);
+      toast.error("Error fetching coin details");
     }
-    }
-
-
-  if (!post?.id) {
-    return <div className='text-center mt-4 text-2xl h-screen flex items-center justify-center'>Post not found</div>;
   }
+
+  useEffect(() => {
+    fetchCoinDetails();
+  }, []);
+
 
   const handlePurchase = () => {
     setLoading(true);
@@ -81,7 +110,54 @@ const BlogPostDetails = () => {
     }, 1000);
   };
 
+  if (!post?.id) {
+    return <div className='text-center mt-4 text-2xl h-screen flex items-center justify-center'>Post not found</div>;
+  }
+
+  
+  if (isLoading) {
+    return (
+      <div className="bg-white px-5 min-h-screen text-gray-800">
+        {/* Back Button Skeleton */}
+        <div className="flex items-center gap-2 pt-4">
+          <div className="h-8 w-20 bg-gray-200 rounded animate-pulse"></div>
+        </div>
+
+        {/* Banner Skeleton */}
+        <div className="relative mt-4">
+          <div className="w-full h-[60vh] bg-gray-200 rounded-3xl animate-pulse"></div>
+          <div className="absolute rounded-b-3xl flex items-center justify-center top-0 bottom-0 left-0 right-0">
+            <div className="h-12 w-64 bg-gray-300 rounded animate-pulse"></div>
+          </div>
+        </div>
+
+        {/* Content Skeleton */}
+        <div className="max-w-4xl mx-auto px-4 py-12">
+          <div className="flex items-center w-full gap-4 mb-8">
+            {/* User and Date Skeleton */}
+            <div className="h-6 w-32 bg-gray-200 rounded animate-pulse"></div>
+            <div className="h-6 w-32 bg-gray-200 rounded animate-pulse"></div>
+            <div className="flex-grow flex justify-end">
+              <div className="h-12 w-40 bg-gray-200 rounded-xl animate-pulse"></div>
+            </div>
+          </div>
+
+          {/* Content Paragraphs Skeleton */}
+          <div className="space-y-4">
+            <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
+            <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse"></div>
+            <div className="h-4 bg-gray-200 rounded w-5/6 animate-pulse"></div>
+            <div className="h-4 bg-gray-200 rounded w-2/3 animate-pulse"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+
+  if (!isLoading) {
   return (
+    <div className="flex">
     <div className="bg-white px-5 min-h-screen text-gray-800">
 
       {/* Back Button */}
@@ -95,13 +171,13 @@ const BlogPostDetails = () => {
       {/* Banner */}
       <div className="relative mt-4">
         <img
-          src={post?.nftImg}
+          src={coinDetails?.mediaContent?.previewImage?.medium}
           alt="Banner"
           className="w-full h-[60vh] object-cover rounded-3xl shadow-lg"
         />
         <div className="absolute rounded-b-3xl flex items-center justify-center top-0 bottom-0 left-0 right-0">
-          <h1 className="text-5xl md:text-6xl text-white font-extrabold text-center drop-shadow-xl">
-            {post?.nftName}
+          <h1 className="text-5xl md:text-6xl text-black font-extrabold text-center drop-shadow-xl bg-white/90 p-4 rounded-xl">
+            {coinDetails?.name}
           </h1>
         </div>
       </div>
@@ -115,7 +191,7 @@ const BlogPostDetails = () => {
           </div>
           <div className="flex w-full items-center gap-2">
             <Calendar className="w-4 h-4" />
-            <span>{post?.date}</span>
+            <span>{formatDate(coinDetails?.createdAt)}</span>
           </div>
 
             <div className="flex items-center w-full">
@@ -131,17 +207,6 @@ const BlogPostDetails = () => {
 
               {post?.username !== "@undefined" && (
               <div className="flex items-center w-full">
-                {/* {post?.forSale && (
-                  <div className="w-full flex justify-end">
-                    <button
-                      onClick={() => setIsPurchaseModalOpen(true)}
-                    className="w-fit flex items-center gap-2 cursor-pointer text-center bg-[#9e74eb] hover:opacity-90 text-white px-6 py-3 rounded-xl transition duration-300 shadow-md"
-                  >
-                    <span className="text-sm">Purchase Content</span>
-                    <img src={darkMarket} alt="" className="w-5 h-5" />
-                  </button>
-                </div>
-                )} */}
                 <div className="w-full flex justify-end">
                   <button
                     onClick={() => isConnected ? setIsModalOpen(true) : toast.error('Please connect your wallet to tip content')}
@@ -183,9 +248,7 @@ const BlogPostDetails = () => {
           )} */}
         </div>
 
-        <div>
-          {post?.content}
-        </div>
+        <div dangerouslySetInnerHTML={{ __html: coinDetails?.description }} />
       </div>
 
       {/* Tip Modal */}
@@ -232,7 +295,63 @@ const BlogPostDetails = () => {
         setLoading={setLoading}
       />
     </div>
+
+    <div className="w-3/12 min-h-screen bg-white rounded-md mt-4 shadow-lg p-4">
+      <div className='flex flex-col gap-4'>
+        <div className="mt-6 flex flex-col md:flex-row md:justify-between items-start md:items-center">
+          <div>
+            <p className="text-sm text-gray-500 mt-1 flex items-center gap-1">
+              <FaHashtag /> Token Symbol: {coinDetails.symbol}
+            </p>
+            <p className="text-sm text-gray-500 flex items-center gap-1">
+              <FaAddressCard /> Address: {coinDetails?.address.slice(0, 6)}...{coinDetails?.address.slice(-4)}
+            </p>
+          </div>
+        </div>
+        
+        <div className="mt-6 flex flex-col md:flex-row md:justify-between items-start md:items-center">
+          <div className="mt-4 md:mt-0 flex gap-4">
+            <div className="">
+              <p className="text-gray-700 font-semibold flex items-center gap-1 justify-center">
+                <FaChartLine /> Market Cap
+              </p>
+              <p className="text-lg font-bold text-green-600">${coinDetails?.marketCap}</p>
+            </div>
+            <div className="">
+              <p className="text-gray-700 font-semibold flex items-center gap-1">
+                <FaCubes /> Total Supply
+              </p>
+              <p className="text-lg font-bold">{formatEther(coinDetails?.totalSupply)} {coinDetails?.symbol}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Token Economics */}
+        <div className="mt-6 gap-4 space-y-4">
+          <div className="bg-gray-100 p-4 rounded-xl w-full">
+            <p className="text-sm text-gray-500 flex items-center gap-1">
+              <FaUsers /> Unique Holders
+            </p>
+            <p className="text-xl font-bold text-gray-800">{coinDetails?.uniqueHolders}</p>
+          </div>
+          <div className="bg-gray-100 p-4 rounded-xl w-full">
+            <p className="text-sm text-gray-500 flex items-center gap-1">
+              <FaExchangeAlt /> Volume (24h)
+            </p>
+            <p className="text-xl font-bold text-gray-800">{coinDetails?.volume24h}</p>
+          </div>
+          <div className="bg-gray-100 p-4 rounded-xl w-full">
+            <p className="text-sm text-gray-500 flex items-center gap-1">
+              <FaExchangeAlt /> Total Volume
+            </p>
+            <p className="text-xl font-bold text-gray-800">{coinDetails?.totalVolume}</p>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
   )
+  }
 }
 
 export default BlogPostDetails

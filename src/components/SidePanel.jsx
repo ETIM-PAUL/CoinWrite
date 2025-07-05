@@ -17,7 +17,7 @@ const SidePanel = () => {
     { username: "@fruganfur", items: 3.16 },
   ];
   return (
-    <div className="w-3/12 h-screen bg-white rounded-md mt-4 shadow-lg p-4">
+    <div className="w-3/12 min-h-screen bg-white rounded-md mt-4 shadow-lg p-4">
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold text-gray-900">Top Posts</h2>

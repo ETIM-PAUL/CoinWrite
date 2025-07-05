@@ -56,21 +56,13 @@ const NftCard = ({ ...props }) => {
         <span className="font-semibold text-sm text-gray-900">{props.nftName.length > 15 ? props.nftName.slice(0, 15) + "..." : props.nftName}</span>
       </div>
       )}
-      {(props.type === "forYou" && props.classType !== "collection") && (
+      {((props.type === "forYou" && props.classType !== "collection") || (props.type === "dashboard")) && (
         <button
           onClick={() => navigate(`/blog_details/${props.id}`)}
           className="w-full bg-[#9e74eb] cursor-pointer hover:opacity-90 text-white p-2 mt-3 flex justify-center gap-2 items-center rounded-lg"
         >
           <CgReadme className="w-5 h-5" />
         <span className="font-semibold">Read More</span>
-      </button>
-      )}
-      {props.type === "dashboard" && ( 
-        <button
-          className="w-full bg-[#9e74eb] cursor-pointer hover:opacity-90 text-white p-2 mt-3 flex justify-center gap-2 items-center rounded-lg"
-        >
-          <img src={darkMarket} alt="" />
-        <span className="font-semibold">Purchase</span>
       </button>
       )}
       {(props.classType === "collection" && props.type === "forYou") && (

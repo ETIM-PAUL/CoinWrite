@@ -119,7 +119,7 @@ const CreatePost = () => {
         description: content,
         image: "ipfs://" + imageUrl.IpfsHash,
         properties: {
-          category: "social"
+          category: category
         }
       };
 

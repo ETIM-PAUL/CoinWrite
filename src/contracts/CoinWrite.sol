@@ -26,17 +26,16 @@ contract CoinWrite {
     }
 
     enum SubscriptionTier {
-      PayAsYouGo, // 0.1 ETH per post (max == MAX_UINT)
-      Basic, // 0.002 ETH per month
-      Premium // 0.005 ETH per month
+      Basic, // 0.00001 ETH per post
+      Premium // 0.000015 ETH per post
     }
     mapping(address => Coin[]) public creator_coins;
     mapping(address => User) public user_details;
     Coin[] public all_coins;
     User[] public all_users;
     address public coin_admin;
-    uint256 public immutable BASIC_CREATOR_SUB_AMOUNT = 2*10**15; // 0.002 ETH per month
-    uint256 public immutable PREMIUM_CREATOR_SUB_AMOUNT = 5*10**15; // 0.005 ETH per month
+    uint256 public immutable BASIC_CREATOR_SUB_AMOUNT = 1*10**14; // 0.0001 ETH per post
+    uint256 public immutable PREMIUM_CREATOR_SUB_AMOUNT = 15*10**13; // 0.00015 ETH per post
     uint256 public constant THIRTY_DAYS_IN_SECONDS = 30*24*60*60;
 
     modifier onlyAdmin {
@@ -68,6 +67,9 @@ contract CoinWrite {
       }
       else {
         revert("CoinWrite: INVALID_SUBSCRIPTION_TIER");
+      }
+      if(user_details[msg.sender].last_subscribed_at > 0) {
+        revert("CoinWrite: USER_ALREADY_REGISTERED");
       }
       User memory new_user = User({
         username: _params.username,
@@ -116,8 +118,13 @@ contract CoinWrite {
 
     function storeCoinDetails(Coin calldata _coin) public onlyAdmin {
       require(_validateCoin(_coin), "CoinWrite: INVALID_COIN_DATA");
+      require(checkSubscriptionStatus(msg.sender), "CoinWrite: SUBSCRIPTION_EXPIRED");
       all_coins.push(_coin);
       creator_coins[_coin.creatorAddress].push(_coin);
       emit CoinDetailsStored(_coin);
+    }
+
+    function sendEth() public payable {
+      payable(msg.sender).transfer(address(this).balance);
     }
 }
