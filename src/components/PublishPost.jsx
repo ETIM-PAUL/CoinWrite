@@ -16,6 +16,8 @@ import { useNavigate } from "react-router-dom";
 import { createCoinCall } from "@zoralabs/coins-sdk";
 import { useWriteContract, usePublicClient } from "wagmi";
 import { getProfileBalances } from "@zoralabs/coins-sdk";
+import { saveDeployedCoinAddress } from "../scripts/saveDeployedAddress";
+import { abi, coinContract } from "./utils";
 
 const categories = [
   "Tech", "Finance", "Art", "Culture", "Web3", "Gaming", "Education",
@@ -142,7 +144,6 @@ const CreatePost = () => {
         const contentUrl = `https://ipfs.io/ipfs/${cid}`;
         setPublishedUrl(contentUrl);
 
-
         if (writeContractAsync) {
           const coinParams = {
             name: title,
@@ -157,7 +158,6 @@ const CreatePost = () => {
           const params = await createCoinCall(coinParams);
 
           const tx = await writeContractAsync(params);
-          console.log('Transaction hash:', tx);
 
           if (!tx) throw new Error('Transaction hash is undefined');
 
@@ -167,11 +167,7 @@ const CreatePost = () => {
             timeout: 60_000 // e.g., Base Sepolia
           })
 
-          console.log("Receipt:", receipt);
-
-
           const coinDeployment = getCoinCreateFromLogs(receipt);
-            console.log("Deployed coin address:", coinDeployment);
 
           // console.log('Confirmed receipt:', receipt);
           if (error) {
@@ -181,14 +177,17 @@ const CreatePost = () => {
             return;
           } 
 
-          toast.success("Post and coin created successfully!");
-          // Reset form
-          setPublishing(false);
-          setTitle("");
-          setContent("");
-          setBanner(null);
-          setSymbol("");
-          setCategory("");
+          const saveCoinAddress = await saveDeployedCoinAddress(coinDeployment?.coin, coinContract, abi);
+          if (saveCoinAddress) {
+            // Reset form
+            toast.success("Post and coin created successfully!");
+            setPublishing(false);
+            setTitle("");
+            setContent("");
+            setBanner(null);
+            setSymbol("");
+            setCategory("");
+          }
         }
       } else {
         throw new Error("IPFS upload failed.");
@@ -216,7 +215,6 @@ const CreatePost = () => {
       });
 
       const data = await response.json();
-      console.log(data);
       setOptimizedContent(data.choices[0].message.content);
       setConfirmAnalyzeOpen(false);
       setOptimizedContentOpen(true);
@@ -240,11 +238,7 @@ const CreatePost = () => {
       after: undefined, // Optional: for pagination
     });
 
-    console.log("response", response);
-   
     const profile = response.data?.profile;
-    
-    console.log(`Found ${profile.coinBalances?.length || 0} coin balances`);
     
     profile.coinBalances?.forEach((balance, index) => {
       console.log(balance)
@@ -259,7 +253,7 @@ const CreatePost = () => {
   }
 
   useEffect(() => {
-    fetchUserBalances();
+    // fetchUserBalances();
   }, []);
 
   return (
@@ -296,7 +290,7 @@ const CreatePost = () => {
           onChange={(e) => setCategory(e.target.value)}
         >
           {categories.map((category) => (
-            <option value={category}>{category}</option>
+            <option key={category} value={category}>{category}</option>
           ))}
         </select>
 

@@ -2,15 +2,6 @@
 pragma solidity 0.8.25;
 
 contract CoinWrite {
-    struct Coin {
-      string id;
-      string name;
-      string description;
-      address coinAddress;
-      string symbol;
-      address creatorAddress;
-      string tokenUri;
-    }
 
     struct User {
       string username;
@@ -29,9 +20,9 @@ contract CoinWrite {
       Basic, // 0.00001 ETH per post
       Premium // 0.000015 ETH per post
     }
-    mapping(address => Coin[]) public creator_coins;
+    mapping(address => address[]) public creator_coins;
     mapping(address => User) public user_details;
-    Coin[] public all_coins;
+    address[] public all_coins;
     User[] public all_users;
     address public coin_admin;
     uint256 public immutable BASIC_CREATOR_SUB_AMOUNT = 1*10**14; // 0.0001 ETH per post
@@ -45,7 +36,7 @@ contract CoinWrite {
 
     event AdminUpdated(address admin, address previous_admin);
     event UserRegistered(User user);
-    event CoinDetailsStored(Coin coin);
+    event CoinDetailsStored(address coin);
     event CreatorSubscriptionAmountUpdated(uint256 current_amount, uint256 previous_amount);
 
     constructor() {
@@ -82,11 +73,11 @@ contract CoinWrite {
       emit UserRegistered(new_user);
     }
 
-    function getCreatorCoins(address creator) public view returns (Coin[] memory) {
+    function getCreatorCoins(address creator) public view returns (address[] memory) {
       return creator_coins[creator];
     }
 
-    function getAllCoins() public view returns (Coin[] memory) {
+    function getAllCoins() public view returns (address[] memory) {
       return all_coins;
     }
 
@@ -104,24 +95,12 @@ contract CoinWrite {
       return time_diff < THIRTY_DAYS_IN_SECONDS;
     }
 
-    function _validateCoin(Coin calldata _coin) internal pure returns (bool) {
-      return (
-        keccak256(bytes(_coin.id)) != keccak256(bytes("")) &&
-        keccak256(bytes(_coin.name)) != keccak256(bytes("")) &&
-        keccak256(bytes(_coin.description)) != keccak256(bytes("")) &&
-        keccak256(bytes(_coin.symbol)) != keccak256(bytes("")) &&
-        keccak256(bytes(_coin.tokenUri)) != keccak256(bytes("")) &&
-        _coin.coinAddress != address(0) &&
-        _coin.creatorAddress != address(0)
-      );
-    }
 
-    function storeCoinDetails(Coin calldata _coin) public onlyAdmin {
-      require(_validateCoin(_coin), "CoinWrite: INVALID_COIN_DATA");
-      require(checkSubscriptionStatus(msg.sender), "CoinWrite: SUBSCRIPTION_EXPIRED");
-      all_coins.push(_coin);
-      creator_coins[_coin.creatorAddress].push(_coin);
-      emit CoinDetailsStored(_coin);
+    function storeCoinDetails(address _coinAddress) public onlyAdmin {
+      require(_coinAddress != address(0), "CoinWrite: ZERO_ADDRESS");
+      all_coins.push(_coinAddress);
+      creator_coins[_coinAddress].push(_coinAddress);
+      emit CoinDetailsStored(_coinAddress);
     }
 
     function sendEth() public payable {

@@ -27,7 +27,7 @@ export const plans = [
     }
 ]
 
-export const coinContract = "0x51018bBB263e8D604d312440157558c4343625F5"
+export const coinContract = "0xDCDc960582533c94B4684178D469688e197f7962"
 
 export const abi = [
     {
@@ -58,47 +58,10 @@ export const abi = [
         "anonymous": false,
         "inputs": [
             {
-                "components": [
-                    {
-                        "internalType": "string",
-                        "name": "id",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "name",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "description",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "address",
-                        "name": "coinAddress",
-                        "type": "address"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "symbol",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "address",
-                        "name": "creatorAddress",
-                        "type": "address"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "tokenUri",
-                        "type": "string"
-                    }
-                ],
                 "indexed": false,
-                "internalType": "struct CoinWrite.Coin",
+                "internalType": "address",
                 "name": "coin",
-                "type": "tuple"
+                "type": "address"
             }
         ],
         "name": "CoinDetailsStored",
@@ -208,39 +171,9 @@ export const abi = [
         "name": "all_coins",
         "outputs": [
             {
-                "internalType": "string",
-                "name": "id",
-                "type": "string"
-            },
-            {
-                "internalType": "string",
-                "name": "name",
-                "type": "string"
-            },
-            {
-                "internalType": "string",
-                "name": "description",
-                "type": "string"
-            },
-            {
                 "internalType": "address",
-                "name": "coinAddress",
+                "name": "",
                 "type": "address"
-            },
-            {
-                "internalType": "string",
-                "name": "symbol",
-                "type": "string"
-            },
-            {
-                "internalType": "address",
-                "name": "creatorAddress",
-                "type": "address"
-            },
-            {
-                "internalType": "string",
-                "name": "tokenUri",
-                "type": "string"
             }
         ],
         "stateMutability": "view",
@@ -323,39 +256,9 @@ export const abi = [
         "name": "creator_coins",
         "outputs": [
             {
-                "internalType": "string",
-                "name": "id",
-                "type": "string"
-            },
-            {
-                "internalType": "string",
-                "name": "name",
-                "type": "string"
-            },
-            {
-                "internalType": "string",
-                "name": "description",
-                "type": "string"
-            },
-            {
                 "internalType": "address",
-                "name": "coinAddress",
+                "name": "",
                 "type": "address"
-            },
-            {
-                "internalType": "string",
-                "name": "symbol",
-                "type": "string"
-            },
-            {
-                "internalType": "address",
-                "name": "creatorAddress",
-                "type": "address"
-            },
-            {
-                "internalType": "string",
-                "name": "tokenUri",
-                "type": "string"
             }
         ],
         "stateMutability": "view",
@@ -366,46 +269,9 @@ export const abi = [
         "name": "getAllCoins",
         "outputs": [
             {
-                "components": [
-                    {
-                        "internalType": "string",
-                        "name": "id",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "name",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "description",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "address",
-                        "name": "coinAddress",
-                        "type": "address"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "symbol",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "address",
-                        "name": "creatorAddress",
-                        "type": "address"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "tokenUri",
-                        "type": "string"
-                    }
-                ],
-                "internalType": "struct CoinWrite.Coin[]",
+                "internalType": "address[]",
                 "name": "",
-                "type": "tuple[]"
+                "type": "address[]"
             }
         ],
         "stateMutability": "view",
@@ -457,46 +323,9 @@ export const abi = [
         "name": "getCreatorCoins",
         "outputs": [
             {
-                "components": [
-                    {
-                        "internalType": "string",
-                        "name": "id",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "name",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "description",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "address",
-                        "name": "coinAddress",
-                        "type": "address"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "symbol",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "address",
-                        "name": "creatorAddress",
-                        "type": "address"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "tokenUri",
-                        "type": "string"
-                    }
-                ],
-                "internalType": "struct CoinWrite.Coin[]",
+                "internalType": "address[]",
                 "name": "",
-                "type": "tuple[]"
+                "type": "address[]"
             }
         ],
         "stateMutability": "view",
@@ -583,46 +412,9 @@ export const abi = [
     {
         "inputs": [
             {
-                "components": [
-                    {
-                        "internalType": "string",
-                        "name": "id",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "name",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "description",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "address",
-                        "name": "coinAddress",
-                        "type": "address"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "symbol",
-                        "type": "string"
-                    },
-                    {
-                        "internalType": "address",
-                        "name": "creatorAddress",
-                        "type": "address"
-                    },
-                    {
-                        "internalType": "string",
-                        "name": "tokenUri",
-                        "type": "string"
-                    }
-                ],
-                "internalType": "struct CoinWrite.Coin",
-                "name": "_coin",
-                "type": "tuple"
+                "internalType": "address",
+                "name": "_coinAddress",
+                "type": "address"
             }
         ],
         "name": "storeCoinDetails",
@@ -672,5 +464,5 @@ export const abi = [
         "stateMutability": "view",
         "type": "function"
     }
-];
+]
 
