@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import SunEditor from "suneditor-react";
 import "suneditor/dist/css/suneditor.min.css";
 import { Dialog, Transition } from "@headlessui/react";
@@ -18,7 +18,8 @@ import { useWriteContract, usePublicClient } from "wagmi";
 import { getProfileBalances } from "@zoralabs/coins-sdk";
 import { saveDeployedCoinAddress } from "../scripts/saveDeployedAddress";
 import { abi, coinContract } from "./utils";
-
+import { PostsContext } from "../context/PostsContext";
+import { ethers } from "ethers";
 const categories = [
   "Tech", "Finance", "Art", "Culture", "Web3", "Gaming", "Education",
   "Science","Health", "Travel","Food", "Entertainment", "Music",
@@ -26,6 +27,8 @@ const categories = [
 ];
 
 const CreatePost = () => {
+  const [isUserSubscribed, setIsUserSubscribed] = useState(false);
+  const [promptRegister, setPromptRegister] = useState(false);
   const [title, setTitle] = useState("");
   const [banner, setBanner] = useState(null);
   const [category, setCategory] = useState(null);
@@ -42,6 +45,7 @@ const CreatePost = () => {
   const { address, isConnected } = useAccount()
   const publicClient = usePublicClient();
   const navigate = useNavigate()
+  const { addCoinAddress, setCoinAddresses, setCoinsDetails } = useContext(PostsContext);
   
   if (!isConnected) {
     toast.error("Please connect your wallet");
@@ -95,7 +99,6 @@ const CreatePost = () => {
 
   // Setup contract write hook
   const { data:hash, writeContractAsync, status, error } = useWriteContract();
-  
 
   const publishPost = async(filename = "metadata.json") => {
     if (!title || !content || !banner || !symbol) {
@@ -180,13 +183,16 @@ const CreatePost = () => {
           const saveCoinAddress = await saveDeployedCoinAddress(coinDeployment?.coin, coinContract, abi);
           if (saveCoinAddress) {
             // Reset form
+            getAllCoins();
+            addCoinAddress(coinDeployment?.coin);
             toast.success("Post and coin created successfully!");
-            setPublishing(false);
             setTitle("");
             setContent("");
             setBanner(null);
             setSymbol("");
             setCategory("");
+            setPublishing(false);
+            navigate(`/dashboard`);
           }
         }
       } else {
@@ -196,6 +202,36 @@ const CreatePost = () => {
       console.error("Error creating coin:", error);
       toast.error("Failed to create coin");
       setPublishing(false);
+    }
+  };
+
+  const getAllCoins = async () => {
+    try {
+      // Replace with your contract address and ABI
+      const contractAddress = coinContract;
+  
+      // Initialize provider and contract
+      const provider = new ethers.providers.JsonRpcProvider(import.meta.env.VITE_RPC_URL);
+      const contract = new ethers.Contract(contractAddress, abi, provider);
+  
+      // Call the getAllCoins function
+      const coinAddresses = await contract.getAllCoins();
+      setCoinAddresses(coinAddresses);
+      
+      try {
+        const response = await getCoins({
+          coins: coinAddresses.map((address) => ({
+            chainId: baseSepolia?.id,
+            collectionAddress: address
+          }))
+        });
+        setCoinsDetails(response?.data?.zora20Tokens)
+      } catch (error) {
+        console.log('error', error);
+      }
+    } catch (error) {
+      console.error('Error fetching coin addresses:', error);
+      throw error;
     }
   };
 
@@ -231,29 +267,25 @@ const CreatePost = () => {
     toast.success("Optimized content copied to clipboard");
   };
 
-  async function fetchUserBalances() {
-    const response = await getProfileBalances({
-      identifier: address, // Can also be zora user profile handle
-      count: 20,        // Optional: number of balances per page
-      after: undefined, // Optional: for pagination
-    });
-
-    const profile = response.data?.profile;
-    
-    profile.coinBalances?.forEach((balance, index) => {
-      console.log(balance)
-    });
-    
-    // For pagination
-    if (profile.coinBalances?.pageInfo?.endCursor) {
-      console.log("Next page cursor:", profile.coinBalances?.pageInfo?.endCursor);
+  async function fetchUserDetails() {
+    try {
+      const userDetails = await publicClient.readContract({
+        address: coinContract,
+        abi: abi,
+        functionName: "checkSubscriptionStatus",
+        args: [address],
+      });
+      if (!userDetails) {
+        setIsUserSubscribed(userDetails);
+        setPromptRegister(true);
+      }
+    } catch (error) {
+      console.error("Error fetching user details:", error);
     }
-    
-    return response;
   }
 
   useEffect(() => {
-    // fetchUserBalances();
+    fetchUserDetails();
   }, []);
 
   return (
@@ -534,6 +566,50 @@ const CreatePost = () => {
                     className="w-fit flex items-center gap-2 cursor-pointer text-center bg-gray-400 hover:opacity-90 text-white px-6 py-3 rounded-xl transition duration-300 shadow-md"
                   >
                     Close
+                  </button>
+                </div>
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
+        </Dialog>
+      </Transition>
+
+      {/* Prompt Register Modal */}
+      <Transition appear show={promptRegister} as={React.Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={() => setPromptRegister(false)}>
+          <Transition.Child
+            as={React.Fragment}
+            enter=""
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black opacity-40 backdrop-blur-sm" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 flex items-center justify-center p-6">
+            <Transition.Child
+              as={React.Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <Dialog.Panel className="bg-white rounded-2xl max-w-4xl w-full shadow-2xl p-6">
+                <Dialog.Title className="text-2xl font-bold mb-4 text-center text-gray-800">No Subscription</Dialog.Title>
+                <div className="flex justify-center items-center">
+                  <p className="text-gray-600 mb-6">You are not subscribed to any plan. Please subscribe to a plan to publish a post.</p>
+                </div>
+                <div className="flex w-full gap-3">
+                  <button
+                    onClick={() => navigate("/#plans")}
+                    className="w-full gap-2 cursor-pointer text-center bg-[#9e74eb] hover:opacity-90 text-white px-6 py-3 rounded-xl transition duration-300 shadow-md"
+                  >
+                    Subscribe
                   </button>
                 </div>
               </Dialog.Panel>

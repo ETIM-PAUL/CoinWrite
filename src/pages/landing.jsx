@@ -1,7 +1,6 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useContext, useEffect, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { ArrowRightIcon, CheckBadgeIcon } from "@heroicons/react/24/outline";
-import { RocketLaunchIcon, PencilSquareIcon, HeartIcon, CurrencyDollarIcon, CloudArrowUpIcon, BoltIcon } from "@heroicons/react/24/solid";
 import heroImage from "../assets/coinwrite-hero.png"; // Replace with actual hero image path
 import laugh from "../assets/laugh_me.png"; // Replace with actual hero image path
 import everything from "../assets/everything_goes.jpg"; // Replace with actual hero image path
@@ -14,6 +13,7 @@ import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { useNavigate } from "react-router-dom";
 import RegisterModal from '../components/RegisterModal';
 import { plans } from "../components/utils";
+
 
 const categories = [
   "Tech", "Finance", "Art", "Culture", "Web3", "Gaming", "Education",
@@ -62,9 +62,7 @@ function LandingPage() {
   ]);
   const { open } = useWeb3Modal()
   const navigate = useNavigate()
-
   const { isConnected } = useAccount();
-
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const registerUser = (title) => {
@@ -76,6 +74,7 @@ function LandingPage() {
       setIsRegisterModalOpen(true);
     }
   }
+
 
   return (
       <div className="px-8">

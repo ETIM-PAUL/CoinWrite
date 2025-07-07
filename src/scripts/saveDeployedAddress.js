@@ -9,9 +9,6 @@ if (!privateKey || !rpcUrl) {
 
 
 export const saveDeployedCoinAddress = async (coinAddress, coinContract, abi) => {
-    console.log("Coin address:", coinAddress);
-    console.log("Coin contract:", coinContract);
-    console.log("abi:", abi);
     // Use providers.JsonRpcProvider instead of ethers.JsonRpcProvider
     const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
     const wallet = new ethers.Wallet(privateKey, provider);

@@ -67,78 +67,35 @@ export const PostsProvider = ({ children }) => {
       date: "June 18, 2025",
       content: "A Journey Through Nature and Words..."
     }]
-);
-  const [collectionPosts, setCollectionPosts] = useState([
-    [
-        {
-          id: 1,
-          nftImg: NFT1,
-          nftName: "ZoroChain SDK Practice",
-          amount: "12.5",
-          for_sale: true,
-          username: "@yur3i",
-          category: "Art",
-          loved: Loved,
-          notLoved: Heart,
-          type: "forYou"
-        },
-        {
-          id: 2,
-          nftImg: NFT2,
-          nftName: "ZoroChain SDK Practice",
-          amount: "12.5",
-          for_sale: true,
-          username: "@yur3i",
-          category: "Web3",
-          loved: Loved,
-          notLoved: Heart,
-          type: "forYou"
-        }, 
-        {
-          id: 3,
-          nftImg: NFT3,
-          nftName: "ZoroChain SDK Practice",
-          amount: "12.5",
-          for_sale: true,
-          username: "@yur3i",
-          category: "Web3",
-          loved: Loved,
-          notLoved: Heart,
-          type: "forYou"
-        }, 
-        {
-          id: 4,
-          nftImg: NFT2,
-          nftName: "Time is money",
-          amount: "7.0",
-          for_sale: false,
-          username: "@undefined",
-          category: "Art",
-          loved: Loved,
-          notLoved: Heart,
-          type: "forYou"
-        }]
-  ]);
-
-  // Function to add a new post
-  const addPost = (newPost) => {
-    setPosts((prevPosts) => [...prevPosts, newPost]);
-  };
-
-  // Function to update a post
-  const updatePost = (id, updatedPost) => {
-    setPosts((prevPosts) =>
-      prevPosts.map((post) => (post.id === id ? updatedPost : post))
     );
+  const [collectionPosts, setCollectionPosts] = useState([]);
+  const [coinDetails, setCoinDetails] = useState([]);
+  const [allCoinAddresses, setAllCoinAddresses] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
+
+
+  const addCoinAddress = (newCoinAddress) => {
+    setAllCoinAddresses((prevCoinAddresses) => [...prevCoinAddresses, newCoinAddress]);
   };
 
-  // Function to delete a post
-  const deletePost = (id) => {
-    setPosts((prevPosts) => prevPosts.filter((post) => post.id !== id));
+  const setCoinAddresses = (coinAddresses) => {
+    setAllCoinAddresses(coinAddresses);
+  };
+
+  const setCoinsDetails = (coinsDetails) => {
+    setCoinDetails(coinsDetails);
+  };
+
+  const setPlatformUsers = (allUsers) => {
+    setAllUsers(allUsers);
+  };
+
+  const addCoinDetails = (newCoinDetails) => {
+    setCoinDetails((prevCoinDetails) => [...prevCoinDetails, newCoinDetails]);
   };
 
   return (
-    <PostsContext.Provider value={{ forYouPosts, collectionPosts, addPost, updatePost, deletePost }}>
+    <PostsContext.Provider value={{ forYouPosts, collectionPosts, addCoinAddress, setCoinAddresses, allCoinAddresses, setCoinsDetails, addCoinDetails, coinDetails, setPlatformUsers, allUsers }}>
       {children}
     </PostsContext.Provider>
   );

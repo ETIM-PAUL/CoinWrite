@@ -7,6 +7,7 @@ import BlogPostDetails from '../components/BlogPostDetails';
 const BlogDetails = () => {
     const { id } = useParams();
 
+
   return (
     <div>
       <div className="w-full bg-[#f6f2ff]">

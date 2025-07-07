@@ -1,9 +1,12 @@
-import React from 'react'
+import React, { useContext, useEffect } from 'react'
 import SideBar from '../components/SideBar'
 import TopHeader from '../components/TopHeader'
 import { Copy, Wallet, Network, Coins } from "lucide-react";
 import { useAccount, useBalance, useChains, useDisconnect } from 'wagmi'
 import { useWeb3Modal } from '@web3modal/wagmi/react'
+import { PostsContext } from '../context/PostsContext';
+import { ethers } from 'ethers';
+import { getProfileBalances } from '@zoralabs/coins-sdk';
 
 const MyWallet = () => {
   const { open } = useWeb3Modal()
@@ -14,13 +17,21 @@ const MyWallet = () => {
   const { data: balance } = useBalance({
     address: address,
   })
+  const { coinDetails } = useContext(PostsContext);
   const { disconnect } = useDisconnect()
 
-  const tokens = [
-    { name: "USDC", balance: "135.00", symbol: "USDC", icon: "https://cryptologos.cc/logos/usd-coin-usdc-logo.png" },
-    { name: "DAI", balance: "78.25", symbol: "DAI", icon: "https://cryptologos.cc/logos/multi-collateral-dai-dai-logo.png" },
-    { name: "LINK", balance: "20.19", symbol: "LINK", icon: "https://cryptologos.cc/logos/chainlink-link-logo.png" },
-  ]
+  const getUserBalance = async (erc20contract) => {
+    // Initialize provider and contract
+    const result = await getProfileBalances(
+      {
+        identifier: address, // Can also be zora user profile handle
+        count: 20,        // Optional: number of balances per page
+        after: undefined, // Optional: for pagination
+      }
+    )
+    console.log(result);
+    return result;
+  };
 
   const handleCopy = () => {
     navigator.clipboard.writeText(address);
@@ -30,6 +41,10 @@ const MyWallet = () => {
     if (!addr) return "";
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
   }
+
+  useEffect(() => {
+    getUserBalance();
+  }, [address]);
 
   return (
     <div>
@@ -93,12 +108,12 @@ const MyWallet = () => {
                       <div className="bg-white rounded-3xl p-6 shadow-md">
                         <h3 className="text-lg font-semibold text-gray-800 mb-4">Other Token Balances</h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          {tokens.map((token, i) => (
+                          {coinDetails.map((token, i) => (
                             <div key={i} className="flex items-center p-4 bg-gray-50 rounded-xl border border-gray-200">
-                              <img src={token.icon} alt={token.name} className="w-10 h-10 rounded-full mr-4" />
+                              <img src={token?.mediaContent?.previewImage?.medium} alt={token.symbol} className="w-10 h-10 rounded-full mr-4" />
                               <div>
-                                <div className="text-lg font-semibold">{token.balance} {token.symbol}</div>
-                                <div className="text-sm text-gray-600">{token.name}</div>
+                                <div className="text-lg font-semibold">{token.symbol}</div>
+                                <div className="text-sm text-gray-600">{token.symbol}</div>
                               </div>
                             </div>
                           ))}

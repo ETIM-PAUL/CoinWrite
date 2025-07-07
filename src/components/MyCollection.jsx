@@ -1,25 +1,65 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import NftCard from "./NftCard";
 import { PlusIcon } from "lucide-react";
 import { PostsContext } from "../context/PostsContext";
 import { useNavigate } from "react-router-dom";
-
-const FilterValue = ({ value, setFilter, filter }) => {
-  return (
-    <div
-      className={`w-1/6 flex justify-center py-1 rounded-lg cursor-pointer ${
-        filter === value ? "bg-[#9e74eb] text-white" : "bg-gray-200 hover:bg-[#9e74eb] text-gray-900 hover:text-white"
-      }`}
-      onClick={() => setFilter(value)}
-    >
-      <span>{value}</span>
-    </div>
-  );
-};
+import { useAccount } from "wagmi";
+import Loved from "../assets/icons/loved.svg";
+import Heart from "../assets/icons/heart.svg";
 
 const MyCollection = ({ classType }) => {
-  const { forYouPosts } = useContext(PostsContext);
+  const [loading, setLoading] = useState(false);
+  const [userCoins, setUserCoins] = useState([]);
+  const [categories, setCategories] = useState({});
+  const { coinDetails } = useContext(PostsContext);
+  const { address } = useAccount();
   const navigate = useNavigate();
+
+  const fetchCoinDetails =  () => {
+    const filteredCoinDetails = coinDetails.filter(
+      (coin) => coin.creatorAddress.toLowerCase() === address.toLowerCase()
+    );
+    setUserCoins(filteredCoinDetails);
+  }
+
+  const getCategory = async (ipfs) => {
+    try {
+      // Convert IPFS URL to HTTP URL
+      const httpUrl = ipfs.replace('ipfs://', 'https://ipfs.io/ipfs/');
+  
+      // Fetch metadata from IPFS
+      const metadata = await fetch(httpUrl);
+      const metadataJson = await metadata.json();
+      // Return the category
+      return metadataJson.properties?.category;
+    } catch (error) {
+      console.error('Error fetching metadata from IPFS:', error);
+      throw error;
+    }
+  };
+  
+  const fetchCategories = async () => {
+    const categoryMap = {};
+    setLoading(true);
+    for (let index = 0; index < coinDetails.length; index++) {
+      const element = coinDetails[index];
+      try {
+        const category = await getCategory(element?.tokenUri);
+        categoryMap[element?.tokenUri] = category;
+      } catch (error) {
+        console.error(`Error fetching category for post ${element?.id}:`, error);
+        categoryMap[element?.id] = 'Unknown';
+      }
+    }
+    setCategories(categoryMap);
+    setLoading(false);
+  };
+
+    useEffect(() => {
+    fetchCategories();
+    fetchCoinDetails();
+  }, [coinDetails]);
+
 
   return (
     <div className="flex">
@@ -38,15 +78,41 @@ const MyCollection = ({ classType }) => {
               <PlusIcon className="w-5 h-5" />
               </button>
             </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-3">
-          {forYouPosts.length > 0 && forYouPosts.filter((post) => post.username === "@undefined").map((post) => (
-            <NftCard
-              key={post.id}
-              {...post}
-              classType={"collection"}
-            />
-          ))}
-          </div>
+
+          {loading ? (
+            // Show skeleton loader while loading
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-3">
+              {[...Array(4)].map((_, index) => (
+                <div key={index} className="animate-pulse">
+                <div className="bg-gray-200 rounded-lg h-40"></div>
+                <div className="mt-2 bg-gray-200 h-4 w-3/4 rounded"></div>
+                <div className="mt-2 bg-gray-200 h-4 w-1/2 rounded"></div>
+              </div>
+              ))}
+            </div>
+          ) : userCoins.length > 0 ? (
+            // Show filtered coin details
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-3">
+              {userCoins.map((coin, index) => (
+                <NftCard
+                  key={index}
+                  nftImg={coin?.mediaContent?.previewImage?.medium}
+                  category={categories[coin?.tokenUri] || 'Unknown'}
+                  nftName={coin?.name}
+                  holders={coin?.uniqueHolders}
+                  loved={Loved}
+                  notLoved={Heart}
+                  {...coin}
+                  type={"collection"}
+                />
+              ))}
+            </div>
+          ) : (
+            // Show "No Posts yet" if there are no matching posts
+            <div className="flex justify-center items-center h-40">
+              <p className="text-gray-500">No Posts yet</p>
+            </div>
+          )}
         </section>
 
         

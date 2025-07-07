@@ -18,7 +18,7 @@ import { formatEther } from 'viem';
 
 const BlogPostDetails = () => {
   const { address, isConnected } = useAccount();
-  const { forYouPosts } = useContext(PostsContext);
+  const { allUsers } = useContext(PostsContext);
   const { id } = useParams();
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,39 +28,21 @@ const BlogPostDetails = () => {
   const [amount, setAmount] = useState(0);
   const [isRemoveFromSaleModalOpen, setIsRemoveFromSaleModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [coinDetails, setCoinDetails] = useState(
-    {
-      caller: "0x1b6e16403b06a51C42Ba339E356a64fE67348e92",
-      payoutRecipient: "0x1b6e16403b06a51C42Ba339E356a64fE67348e92",
-      platformReferrer: "0x1b6e16403b06a51C42Ba339E356a64fE67348e92",
-      currency: "0x0000000000000000000000000000000000000000",
-      uri: "ipfs://QmQrmSrkhzzRtkqWRRbTwoMY5DM4PpwCQRa4DTByqoc6Ae",
-      name: "Port Harcourt City",
-      symbol: "PHC",
-      coin: "0xabAc1Aad7123A3431529598f2624273454A73D3d",
-      poolKey: {
-        currency0: "0x0000000000000000000000000000000000000000",
-        currency1: "0xabAc1Aad7123A3431529598f2624273454A73D3d",
-        fee: 20000,
-        tickSpacing: 200,
-        hooks: "0xD7A343d20e4C8E9725416c5f1cfaAeD749d49040",
-        poolKeyHash: "0xbaab19aab1c86c08cc574d8216d74459886c99aa99670a09061e8071000d228b",
-        version: "1.0.0"
-      }
-    }
-  );
-  const [coinAddress, setCoinAddress] = useState("0xabAc1Aad7123A3431529598f2624273454A73D3d");
-  const post = forYouPosts.find((post) => post.id === Number(id));
+  const [coinDetails, setCoinDetails] = useState();
   const { data: ethBalance } = useBalance({
     address: address,
   })
   
+  const getUserName = (address) => {
+    const user = allUsers.find((user) => user.userAddress.toLowerCase() === address.toLowerCase());
 
+    return user?.username;
+  }
 
-    async function fetchCoinDetails() {
+  async function fetchCoinDetails() {
       try {
       const response = await getCoin({
-        address: "0xabAc1Aad7123A3431529598f2624273454A73D3d",
+        address: id,
         chain: baseSepolia?.id
       });
       
@@ -110,7 +92,7 @@ const BlogPostDetails = () => {
     }, 1000);
   };
 
-  if (!post?.id) {
+  if (!loading && !coinDetails?.address) {
     return <div className='text-center mt-4 text-2xl h-screen flex items-center justify-center'>Post not found</div>;
   }
 
@@ -155,7 +137,7 @@ const BlogPostDetails = () => {
   }
 
 
-  if (!isLoading) {
+  if (!isLoading && coinDetails?.address) {
   return (
     <div className="flex">
     <div className="bg-white px-5 min-h-screen text-gray-800">
@@ -187,65 +169,37 @@ const BlogPostDetails = () => {
         <div className="flex items-center w-full gap-4 text-gray-500 text-sm mb-8">
           <div className="flex items-center gap-2">
             <User className="w-4 h-4" />
-            <span>{post?.username}</span>
+            <span>{getUserName(coinDetails?.creatorAddress)}</span>
           </div>
           <div className="flex w-full items-center gap-2">
             <Calendar className="w-4 h-4" />
             <span>{formatDate(coinDetails?.createdAt)}</span>
           </div>
 
-            <div className="flex items-center w-full">
-                <div className="w-full flex justify-end">
+            <div className="flex items-center w-full gap-2">
+                <div className="flex items-center w-full">
                   <button
                     onClick={() => setIsPurchaseModalOpen(true)}
-                  className="w-fit flex items-center gap-2 cursor-pointer text-center bg-[#9e74eb] hover:opacity-90 text-white px-6 py-3 rounded-xl transition duration-300 shadow-md"
+                  className="w-full flex items-center gap-2 cursor-pointer justify-center bg-[#9e74eb] hover:opacity-90 text-white py-3 rounded-xl transition duration-300 shadow-md"
                 >
-                  <span className="text-sm">Purchase Coins</span>
+                  <span className="text-sm text-center">Trade Coins</span>
                   <img src={darkMarket} alt="" className="w-5 h-5" />
                 </button>
               </div>
 
-              {post?.username !== "@undefined" && (
+              {coinDetails?.creatorAddress !== address && (
               <div className="flex items-center w-full">
-                <div className="w-full flex justify-end">
                   <button
                     onClick={() => isConnected ? setIsModalOpen(true) : toast.error('Please connect your wallet to tip content')}
                     className="w-fit flex items-center gap-2 cursor-pointer text-center bg-[#9e74eb] hover:opacity-90 text-white px-6 py-3 rounded-xl transition duration-300 shadow-md"
                   >
-                    <span className="text-sm">Tip Creator</span>
+                    <span className="text-sm">Tip</span>
                     <GiMoneyStack className="w-5 h-5" />
                   </button>
-                </div>
               </div>
             )}
 
             </div>
-
-          {/* {post?.username === "@undefined" && (
-            <div className="flex items-center w-full">
-              {post?.forSale ? (
-                <div className="w-full flex justify-end">
-                  <button
-                    onClick={() => setIsRemoveFromSaleModalOpen(true)}
-                  className="w-fit flex items-center gap-2 cursor-pointer text-center bg-[#9e74eb] hover:opacity-90 text-white px-6 py-3 rounded-xl transition duration-300 shadow-md"
-                >
-                  <span className="text-sm">Remove Post From Sale</span>
-                  <img src={darkMarket} alt="" className="w-5 h-5" />
-                </button>
-              </div>
-              ) : (
-                <div className="w-full flex justify-end">
-                  <button
-                    onClick={() => setIsPutUpForSaleModalOpen(true)}
-                  className="w-fit flex items-center gap-2 cursor-pointer text-center bg-[#9e74eb] hover:opacity-90 text-white px-6 py-3 rounded-xl transition duration-300 shadow-md"
-                >
-                  <span className="text-sm">Put Post Up For Sale</span>
-                  <img src={darkMarket} alt="" className="w-5 h-5" />
-                </button>
-                </div>
-              )}
-            </div>
-          )} */}
         </div>
 
         <div dangerouslySetInnerHTML={{ __html: coinDetails?.description }} />
@@ -296,7 +250,7 @@ const BlogPostDetails = () => {
       />
     </div>
 
-    <div className="w-3/12 min-h-screen bg-white rounded-md mt-4 shadow-lg p-4">
+    <div className="w-[30%] min-h-screen bg-white rounded-md mt-4 shadow-lg p-4">
       <div className='flex flex-col gap-4'>
         <div className="mt-6 flex flex-col md:flex-row md:justify-between items-start md:items-center">
           <div>

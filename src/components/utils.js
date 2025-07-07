@@ -14,6 +14,17 @@ export const formatDate = (dateString) => {
     }
   };
 
+export const groupCoinsByCreator = (coins) => {
+  return coins.reduce((acc, coin) => {
+    const creator = coin.creatorAddress;
+    if (!acc[creator]) {
+      acc[creator] = [];
+    }
+    acc[creator].push(coin);
+    return acc;
+  }, {});
+};
+
 export const plans = [
     {
         title: 'Basic',
@@ -27,7 +38,7 @@ export const plans = [
     }
 ]
 
-export const coinContract = "0xDCDc960582533c94B4684178D469688e197f7962"
+export const coinContract = "0xB33A82aA79a31975213432eC350dA98a99c28A50"
 
 export const abi = [
     {
@@ -105,6 +116,11 @@ export const abi = [
                         "internalType": "string[]",
                         "name": "interests",
                         "type": "string[]"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "userAddress",
+                        "type": "address"
                     },
                     {
                         "internalType": "uint256",
@@ -198,6 +214,11 @@ export const abi = [
                 "internalType": "enum CoinWrite.SubscriptionTier",
                 "name": "subscription_tier",
                 "type": "uint8"
+            },
+            {
+                "internalType": "address",
+                "name": "userAddress",
+                "type": "address"
             },
             {
                 "internalType": "uint256",
@@ -299,6 +320,11 @@ export const abi = [
                         "type": "string[]"
                     },
                     {
+                        "internalType": "address",
+                        "name": "userAddress",
+                        "type": "address"
+                    },
+                    {
                         "internalType": "uint256",
                         "name": "last_subscribed_at",
                         "type": "uint256"
@@ -357,6 +383,11 @@ export const abi = [
                         "internalType": "string[]",
                         "name": "interests",
                         "type": "string[]"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "userAddress",
+                        "type": "address"
                     },
                     {
                         "internalType": "uint256",
@@ -456,6 +487,11 @@ export const abi = [
                 "type": "uint8"
             },
             {
+                "internalType": "address",
+                "name": "userAddress",
+                "type": "address"
+            },
+            {
                 "internalType": "uint256",
                 "name": "last_subscribed_at",
                 "type": "uint256"
@@ -465,4 +501,32 @@ export const abi = [
         "type": "function"
     }
 ]
+
+export const formatDateMoment = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const seconds = Math.floor((now - date) / 1000);
+  
+    let interval = Math.floor(seconds / 31536000);
+    if (interval >= 1) {
+      return interval + ' year' + (interval === 1 ? '' : 's') + ' ago';
+    }
+    interval = Math.floor(seconds / 2592000);
+    if (interval >= 1) {
+      return interval + ' month' + (interval === 1 ? '' : 's') + ' ago';
+    }
+    interval = Math.floor(seconds / 86400);
+    if (interval >= 1) {
+      return interval + ' day' + (interval === 1 ? '' : 's') + ' ago';
+    }
+    interval = Math.floor(seconds / 3600);
+    if (interval >= 1) {
+      return interval + ' hour' + (interval === 1 ? '' : 's') + ' ago';
+    }
+    interval = Math.floor(seconds / 60);
+    if (interval >= 1) {
+      return interval + ' minute' + (interval === 1 ? '' : 's') + ' ago';
+    }
+    return Math.floor(seconds) + ' second' + (seconds === 1 ? '' : 's') + ' ago';
+  };
 

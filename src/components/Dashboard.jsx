@@ -1,13 +1,11 @@
-import React, { useState, useEffect } from "react";
-import NFT1 from "../assets/NFTs/NFT1.png";
-import NFT2 from "../assets/NFTs/NFT2.png";
-import NFT3 from "../assets/NFTs/NFT3.png";
+import React, { useState, useEffect, useContext } from "react";
 import Profile from "../assets/icons/profile.svg";
 import SidePanel from "./SidePanel";
 import NftCard from "./NftCard";
-import NftRowData from "./CategoriesData";
 import Loved from "../assets/icons/loved.svg";
 import Heart from "../assets/icons/heart.svg";
+import { PostsContext } from "../context/PostsContext";
+import { groupCoinsByCreator } from "./utils";
 
 const CreatorFlex = ({ ...props }) => {
   return (
@@ -39,15 +37,54 @@ const FilterValue = ({ value, setFilter, filter }) => {
 const Dashboard = () => {
   const [filter, setFilter] = useState("Art");
   const [isLoading, setIsLoading] = useState(true);
+  const { coinDetails, allUsers } = useContext(PostsContext);
+  const [categories, setCategories] = useState({});
+
+  const getUserName = (address) => {
+    const user = allUsers.find((user) => user.userAddress.toLowerCase() === address.toLowerCase());
+
+    return user?.username;
+  }
+
+  const getPostCount = (address) => {
+    return coinDetails.filter((coin) => coin.creatorAddress.toLowerCase() === address.toLowerCase()).length;
+  }
+
+  const getCategory = async (ipfs) => {
+    try {
+      // Convert IPFS URL to HTTP URL
+      const httpUrl = ipfs.replace('ipfs://', 'https://ipfs.io/ipfs/');
+  
+      // Fetch metadata from IPFS
+      const metadata = await fetch(httpUrl);
+      const metadataJson = await metadata.json();
+      // Return the category
+      return metadataJson.properties?.category;
+    } catch (error) {
+      console.error('Error fetching metadata from IPFS:', error);
+      throw error;
+    }
+  };
+  
+  const fetchCategories = async () => {
+    const categoryMap = {};
+    for (let index = 0; index < coinDetails.length; index++) {
+      const element = coinDetails[index];
+      try {
+        const category = await getCategory(element?.tokenUri);
+        categoryMap[element?.tokenUri] = category;
+      } catch (error) {
+        console.error(`Error fetching category for post ${element?.id}:`, error);
+        categoryMap[element?.id] = 'Unknown';
+      }
+    }
+    setCategories(categoryMap);
+    setIsLoading(false);
+  };
 
   useEffect(() => {
-    // Simulate loading delay
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 5000); // 5 seconds delay
-
-    return () => clearTimeout(timer);
-  }, []);
+    fetchCategories();
+  }, [coinDetails]);
 
   const SkeletonDashboard = () => (
     <div className="flex">
@@ -161,7 +198,7 @@ const Dashboard = () => {
     </div>
   );
 
-  if (isLoading) {
+  if (isLoading || Object.keys(categories).length === 0) {
     return <SkeletonDashboard />;
   }
 
@@ -171,47 +208,29 @@ const Dashboard = () => {
         
         <section className="p-3">
           <div className="w-full text-sm flex justify-between">
-            <span className="font-bold text-gray-900">Top Posts For Sale</span>
+            <span className="font-bold text-gray-900">Posts</span>
             <span className="text-blue-500 mr-2 cursor-pointer">See more</span>
           </div>
           <div className="w-full flex gap-3 mt-3">
-            <FilterValue value="Art" setFilter={setFilter} filter={filter} />
-            <FilterValue value="Music" setFilter={setFilter} filter={filter} />
-            <FilterValue value="Sport" setFilter={setFilter} filter={filter} />
-            <FilterValue value="Photography" setFilter={setFilter} filter={filter} />
-            <FilterValue value="Photos" setFilter={setFilter} filter={filter} />
+          {Object.keys(categories).length > 0 && Object.entries(categories).map(([key, value], index) => (
+            <FilterValue key={index} value={value} setFilter={setFilter} filter={filter} />
+            ))}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
+            {coinDetails?.map((coin,id) => (
             <NftCard
-              nftImg={NFT1}
-              category="Web3"
-              nftName="ZoroChain SDK Practice"
-              amount="12.5"
-              username="@yur3i"
+              key={id}
+              address={coin?.address}
+              nftImg={coin?.mediaContent?.previewImage?.medium}
+              category={categories[coin?.tokenUri] || 'Unknown'}
+              nftName={coin?.name}
+              holders={coin?.uniqueHolders}
+              username={getUserName(coin?.creatorAddress)}
               loved={Loved}
               notLoved={Heart}
               type="dashboard"
             />
-            <NftCard
-              nftImg={NFT2}
-              category="Art"
-              nftName="Time is money"
-              amount="11.0"
-              username="@undefined"
-              loved={Loved}
-              notLoved={Heart}
-              type="dashboard"
-            />
-            <NftCard
-              nftImg={NFT3}
-              category="Entertainment"
-              nftName="Love is in the air"
-              amount="10.2"
-              username="@stark"
-              notLoved={Heart}
-              loved={Loved}
-              type="dashboard"
-            />
+            ))}
           </div>
         </section>
 
@@ -222,10 +241,9 @@ const Dashboard = () => {
           </div>
           <div className="py-2 px-2 mt-3 flex w-full bg-white rounded-lg shadow">
             <div className="flex w-full flex-wrap justify-between my-2 items-center gap-2">
-              <CreatorFlex username="@annetteblack" posts="230,000" />
-              <CreatorFlex username="@grandbrand" posts="205,000" />
-              <CreatorFlex username="@yrestra" posts="300,000" />
-              <CreatorFlex username="@natorcolors" posts="150,000" />
+              {Object.keys(groupCoinsByCreator(coinDetails))?.map((coin) => (
+              <CreatorFlex key={coin} username={getUserName(coin)} posts={getPostCount(coin)} />
+              ))}
             </div>
           </div>
         </section>
@@ -293,7 +311,7 @@ const Dashboard = () => {
           </div>
         </section>
       </div>
-      <SidePanel />
+      <SidePanel posts={coinDetails} />
     </div>
   );
 };
