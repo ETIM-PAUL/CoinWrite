@@ -1,18 +1,57 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { toast } from 'react-toastify';
+import { formatEther } from 'viem';
+import { ethers } from 'ethers';
+import { coinContract } from './utils';
 
-const TipModal = ({isOpen, onClose }) => {
+const TipModal = ({isOpen, onClose, address, coinDetails, userCoinBalance }) => {
   const [amount, setAmount] = useState('');
   const [tipping, setTipping] = useState(false);
 
-  const handleTip = () => {
-    setTipping(true);
-    setTimeout(() => {
-      setTipping(false);
-      toast.success('Tip sent successfully');
-      onClose();
-    }, 1000);
+  const handleTip = async() => {
+    const abi = [
+      {
+        "constant": false,
+        "inputs": [
+          { "name": "_to", "type": "address" },
+          { "name": "_value", "type": "uint256" }
+        ],
+        "name": "transfer",
+        "outputs": [{ "name": "", "type": "bool" }],
+        "type": "function"
+      }
+    ];
+
+    // Initialize provider and signer
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+
+    // Connect to the contract
+    const contract = new ethers.Contract(coinDetails.address, abi, signer);
+
+    // Function to send ERC20 tokens
+      try {
+        setTipping(true);
+        // Convert amount to wei (assuming 18 decimals)
+        const amountInWei = ethers.utils.parseUnits(amount, 18);
+
+        // Call the transfer function
+        const tx = await contract.transfer(coinDetails.creatorAddress, amountInWei);
+        console.log('Transaction sent:', tx.hash);
+
+        // Wait for the transaction to be mined
+        const receipt = await tx.wait();
+        console.log('Tip sent successfully');
+        setTipping(false);
+        toast.success('Tip sent successfully');
+        onClose();
+        return receipt;
+      } catch (error) {
+        setTipping(false);
+        console.error('Error sending tokens:', error);
+        throw error;
+      }
   };
 
   
@@ -63,6 +102,10 @@ const TipModal = ({isOpen, onClose }) => {
                   />
                 </div>
 
+                <p className="text-sm mt-4 text-gray-500 mt-1">
+                Your balance: {Number(formatEther(userCoinBalance)).toFixed(2)} {coinDetails.symbol}
+              </p>
+
                 <div className="mt-4 flex justify-end gap-2">
                   <button
                     type="button"
@@ -74,7 +117,7 @@ const TipModal = ({isOpen, onClose }) => {
                   </button>
                   <button
                     type="button"
-                    disabled={!amount || tipping}
+                    disabled={amount <= 0 || tipping || amount > Number(formatEther(userCoinBalance))}
                     className="inline-flex w-full disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer justify-center rounded-md border border-transparent bg-[#9e74eb] px-4 py-2 text-sm font-medium text-white hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#9e74eb] focus-visible:ring-offset-2"
                     onClick={handleTip}
                   >

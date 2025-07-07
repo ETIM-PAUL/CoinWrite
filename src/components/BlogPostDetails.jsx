@@ -205,6 +205,7 @@ const BlogPostDetails = () => {
       <TipModal
       coinDetails={coinDetails}
       address={address}
+      userCoinBalance={userCoinBalance}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />
