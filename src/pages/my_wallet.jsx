@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import SideBar from '../components/SideBar'
 import TopHeader from '../components/TopHeader'
 import { Copy, Wallet, Network, Coins } from "lucide-react";
@@ -7,10 +7,12 @@ import { useWeb3Modal } from '@web3modal/wagmi/react'
 import { PostsContext } from '../context/PostsContext';
 import { ethers } from 'ethers';
 import { getProfileBalances } from '@zoralabs/coins-sdk';
+import { formatEther } from 'ethers/lib/utils';
 
 const MyWallet = () => {
   const { open } = useWeb3Modal()
   const { address, isConnected } = useAccount()
+  const [coinBalances, setCoinBalances] = useState([]);
   const { chainId } = useAccount()
   const chains = useChains();
   const currentChain = chains.find(c => c.id === chainId);
@@ -25,11 +27,12 @@ const MyWallet = () => {
     const result = await getProfileBalances(
       {
         identifier: address, // Can also be zora user profile handle
-        count: 20,        // Optional: number of balances per page
+        count: 50,        // Optional: number of balances per page
         after: undefined, // Optional: for pagination
       }
     )
-    console.log(result);
+    setCoinBalances(result?.data?.profile?.coinBalances?.edges);
+
     return result;
   };
 
@@ -108,12 +111,15 @@ const MyWallet = () => {
                       <div className="bg-white rounded-3xl p-6 shadow-md">
                         <h3 className="text-lg font-semibold text-gray-800 mb-4">Other Token Balances</h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          {coinDetails.map((token, i) => (
+                          {coinBalances?.length > 0 && coinBalances.map((token, i) => (
                             <div key={i} className="flex items-center p-4 bg-gray-50 rounded-xl border border-gray-200">
-                              <img src={token?.mediaContent?.previewImage?.medium} alt={token.symbol} className="w-10 h-10 rounded-full mr-4" />
+                              <img src={token?.node?.coin?.mediaContent?.previewImage?.medium} alt={token.symbol} className="w-10 h-10 rounded-full mr-4" />
                               <div>
-                                <div className="text-lg font-semibold">{token.symbol}</div>
-                                <div className="text-sm text-gray-600">{token.symbol}</div>
+                                <div className="flex items-center gap-1">
+                                  <div className="text-lg font-semibold">{Number(formatEther(token?.node?.balance)).toFixed(2)}</div>
+                                  <div className="text-sm text-gray-600">{token.node?.coin?.symbol}</div>
+                                </div>
+                                <div className="text-sm text-gray-600">{token.node?.coin?.name}</div>
                               </div>
                             </div>
                           ))}

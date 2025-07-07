@@ -10,8 +10,8 @@ import darkMarket from "../assets/icons/darkMarket.svg";
 import PromptModal from './PromptModal';
 import { useAccount, useBalance } from 'wagmi';
 import EthModal from './BuySellModal';
-import { getCoin } from '@zoralabs/coins-sdk';
-import { baseSepolia } from 'viem/chains';
+import { getCoin, getProfileBalances } from '@zoralabs/coins-sdk';
+import { base, baseSepolia } from 'viem/chains';
 import {formatDate } from './utils';
 import { FaCoins, FaHashtag, FaAddressCard, FaChartLine, FaCubes, FaUsers, FaExchangeAlt, FaHistory, FaExternalLinkAlt, FaUserCircle } from "react-icons/fa";
 import { formatEther } from 'viem';
@@ -29,6 +29,7 @@ const BlogPostDetails = () => {
   const [isRemoveFromSaleModalOpen, setIsRemoveFromSaleModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [coinDetails, setCoinDetails] = useState();
+  const [userCoinBalance, setUserCoinBalance] = useState(0);
   const { data: ethBalance } = useBalance({
     address: address,
   })
@@ -43,10 +44,9 @@ const BlogPostDetails = () => {
       try {
       const response = await getCoin({
         address: id,
-        chain: baseSepolia?.id
+        chain: base?.id
       });
       
-      console.log("Coin market cap:", response);
       if (response?.data?.zora20Token) {
         setCoinDetails(response?.data?.zora20Token);
         setIsLoading(false);
@@ -59,8 +59,21 @@ const BlogPostDetails = () => {
     }
   }
 
+  const getUserBalance = async (erc20contract) => {
+    // Initialize provider and contract
+    const result = await getProfileBalances(
+      {
+        identifier: address, // Can also be zora user profile handle
+        count: 50,        // Optional: number of balances per page
+        after: undefined, // Optional: for pagination
+      }
+    )
+    setUserCoinBalance(result?.data?.profile?.coinBalances?.edges?.find((coin) => coin?.node?.coin?.address === erc20contract)?.node?.balance);
+  };
+
   useEffect(() => {
     fetchCoinDetails();
+    getUserBalance(id);
   }, []);
 
 
@@ -74,23 +87,6 @@ const BlogPostDetails = () => {
     }, 1000);
   };
 
-  const handleRemoveFromSale = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      toast.success('Post updated successful');
-      setIsRemoveFromSaleModalOpen(false);
-    }, 1000);
-  };
-
-  const handlePutUpForSale = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      toast.success('Post updated successfully');
-      setIsPutUpForSaleModalOpen(false);
-    }, 1000);
-  };
 
   if (!loading && !coinDetails?.address) {
     return <div className='text-center mt-4 text-2xl h-screen flex items-center justify-center'>Post not found</div>;
@@ -213,41 +209,22 @@ const BlogPostDetails = () => {
         onClose={() => setIsModalOpen(false)}
       />
 
-      {/* Prompt Modal */}
-      <PromptModal
-        isOpen={isPutUpForSaleModalOpen}
-        heading="Put Post Up For Sale"
-        description={`Put the blog post up for sale. If purchased, all new tips will be sent to new owner's wallet.`}
-        handleAction={handlePutUpForSale}
-        onClose={() => setIsPutUpForSaleModalOpen(false)}
-        type="forSale"
-        loading={loading}
-        setLoading={setLoading}
-        amount={amount}
-        setAmount={setAmount}
-      />
 
       {isPurchaseModalOpen && (
         <EthModal
           ethBalance={ethBalance?.formatted?.slice(0, 7)}
+          userCoinBalance={userCoinBalance}
           onSell={handlePurchase}
           onBuy={handlePurchase}
           onClose={() => setIsPurchaseModalOpen(false)}
           loading={loading}
           setLoading={setLoading}
+          address={address}
           coinDetails={coinDetails}
+          erc20Address={id}
         />
       )}
-      <PromptModal
-        isOpen={isRemoveFromSaleModalOpen}
-        heading="Remove Post From Sale"
-        description={`Remove the blog post from sale. After removal, the post will no longer be available for purchase.`}
-        handleAction={handleRemoveFromSale}
-        onClose={() => setIsRemoveFromSaleModalOpen(false)}
-        type="remove"
-        loading={loading}
-        setLoading={setLoading}
-      />
+
     </div>
 
     <div className="w-[30%] min-h-screen bg-white rounded-md mt-4 shadow-lg p-4">
@@ -275,7 +252,7 @@ const BlogPostDetails = () => {
               <p className="text-gray-700 font-semibold flex items-center gap-1">
                 <FaCubes /> Total Supply
               </p>
-              <p className="text-lg font-bold">{formatEther(coinDetails?.totalSupply)} {coinDetails?.symbol}</p>
+              <p className="text-lg font-bold">{coinDetails?.totalSupply} {coinDetails?.symbol}</p>
             </div>
           </div>
         </div>

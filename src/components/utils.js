@@ -38,7 +38,7 @@ export const plans = [
     }
 ]
 
-export const coinContract = "0xB33A82aA79a31975213432eC350dA98a99c28A50"
+export const coinContract = "0x1CB7160E2Ed02aAFe8Ee98160460BFf4D2caBB31"
 
 export const abi = [
     {

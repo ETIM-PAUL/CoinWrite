@@ -68,14 +68,16 @@ const Dashboard = () => {
   
   const fetchCategories = async () => {
     const categoryMap = {};
-    for (let index = 0; index < coinDetails.length; index++) {
-      const element = coinDetails[index];
-      try {
-        const category = await getCategory(element?.tokenUri);
-        categoryMap[element?.tokenUri] = category;
-      } catch (error) {
-        console.error(`Error fetching category for post ${element?.id}:`, error);
-        categoryMap[element?.id] = 'Unknown';
+    if(coinDetails?.length > 0) {
+      for (let index = 0; index < coinDetails.length; index++) {
+        const element = coinDetails[index];
+        try {
+          const category = await getCategory(element?.tokenUri);
+          categoryMap[element?.tokenUri] = category;
+        } catch (error) {
+          console.error(`Error fetching category for post ${element?.id}:`, error);
+          categoryMap[element?.id] = 'Unknown';
+        }
       }
     }
     setCategories(categoryMap);
@@ -198,8 +200,14 @@ const Dashboard = () => {
     </div>
   );
 
-  if (isLoading || Object.keys(categories).length === 0) {
+  if (isLoading && Object.keys(categories).length === 0) {
     return <SkeletonDashboard />;
+  }
+  
+  if (!isLoading && Object.keys(categories).length === 0) {
+    return <div className="flex bg-white justify-center items-center h-screen">
+      <div className="text-2xl font-bold">No posts found</div>
+    </div>;
   }
 
   return (

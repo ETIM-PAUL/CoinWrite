@@ -24,7 +24,7 @@ import {
 import { parseEther, createPublicClient, http, createWalletClient, custom } from 'viem';
 import { toast } from 'react-toastify';
 import { abi, coinContract } from './utils';
-import { baseSepolia } from 'viem/chains';
+import { base, baseSepolia } from 'viem/chains';
 import { useNavigate } from 'react-router-dom';
 // Define the enum locally
 const SubscriptionTier = {
@@ -90,8 +90,8 @@ const RegisterModal = ({ isOpen, setIsOpen, plan }) => {
 
        // Initialize the public client
       const publicClient = createPublicClient({
-        chain: baseSepolia,
-        transport: http('https://base-sepolia.g.alchemy.com/v2/7Xfj0s3hOk-JwMVZ40Jkgo9OT4vfP2Ul')
+        chain: base,
+        transport: http('https://base-mainnet.g.alchemy.com/v2/7Xfj0s3hOk-JwMVZ40Jkgo9OT4vfP2Ul')
       });
 
       // Get the account first
@@ -109,7 +109,7 @@ const RegisterModal = ({ isOpen, setIsOpen, plan }) => {
       // Get the wallet client with the account
       const walletClient = await createWalletClient({
         account,
-        chain: baseSepolia,
+        chain: base,
         transport: custom(window.ethereum)
       });
 

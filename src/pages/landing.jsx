@@ -22,7 +22,6 @@ const categories = [
 ];
 
 function LandingPage() {
-  const [isOpen, setIsOpen] = useState(false);
   const [blogs, setBlogs] = useState([
     {
       id: 1,

@@ -28,7 +28,7 @@ const ForYouPiece = ({ classType }) => {
   const { coinDetails } = useContext(PostsContext);
 
   const fetchCoinDetails =  () => {
-    setUserCoins(coinDetails);
+    setUserCoins(coinDetails ?? []);
   }
 
   const getCategory = async (ipfs) => {
@@ -51,6 +51,7 @@ const ForYouPiece = ({ classType }) => {
   
   const fetchCategories = async () => {
     const categoryMap = {};
+    if(coinDetails?.length > 0) {
     for (let index = 0; index < coinDetails.length; index++) {
       const element = coinDetails[index];
       try {
@@ -61,6 +62,7 @@ const ForYouPiece = ({ classType }) => {
         categoryMap[element?.id] = 'Unknown';
       }
     }
+  }
     setCategories(categoryMap);
   };
 

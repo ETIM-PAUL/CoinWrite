@@ -13,7 +13,7 @@ import { abi, coinContract } from "./components/utils";
 import { ethers } from "ethers";
 import { getCoins } from "@zoralabs/coins-sdk";
 import { PostsContext } from "./context/PostsContext";
-import { baseSepolia } from "viem/chains";
+import { base, baseSepolia } from "viem/chains";
 
 function App() {
   const { setCoinAddresses, setCoinsDetails, setPlatformUsers } = useContext(PostsContext);
@@ -34,7 +34,7 @@ function App() {
       try {
         const response = await getCoins({
           coins: coinAddresses.map((address) => ({
-            chainId: baseSepolia?.id,
+            chainId: base?.id,
             collectionAddress: address
           }))
         });

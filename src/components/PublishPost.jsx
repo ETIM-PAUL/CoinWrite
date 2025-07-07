@@ -8,9 +8,9 @@ import { VscLoading } from "react-icons/vsc";
 import { GiArtificialIntelligence } from "react-icons/gi";
 // import { LMStudioClient } from "@lmstudio/sdk";
 import axios from "axios";
-import { DeployCurrency, getCoinCreateFromLogs } from "@zoralabs/coins-sdk";
+import { DeployCurrency, getCoinCreateFromLogs, getCoins } from "@zoralabs/coins-sdk";
 import {parseEther } from "viem";
-import { baseSepolia } from "viem/chains";
+import { base, baseSepolia } from "viem/chains";
 import { useAccount } from "wagmi";
 import { useNavigate } from "react-router-dom";
 import { createCoinCall } from "@zoralabs/coins-sdk";
@@ -155,8 +155,8 @@ const CreatePost = () => {
             payoutRecipient: address,
             platformReferrer:address,
             initialPurchaseWei: parseEther("0"),
-            chainId: baseSepolia.id, // Optional: defaults to base.id
-            currency: DeployCurrency.ETH, // Optional: ZORA or ETH
+            chainId: base.id, // Optional: defaults to base.id
+            currency: DeployCurrency.ZORA, // Optional: ZORA or ETH
           };
           const params = await createCoinCall(coinParams);
 
@@ -221,7 +221,7 @@ const CreatePost = () => {
       try {
         const response = await getCoins({
           coins: coinAddresses.map((address) => ({
-            chainId: baseSepolia?.id,
+            chainId: base?.id,
             collectionAddress: address
           }))
         });

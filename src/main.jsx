@@ -8,15 +8,15 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { WagmiProvider, createConfig, http } from 'wagmi'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { baseSepolia } from 'wagmi/chains'
+import { base, baseSepolia } from 'wagmi/chains'
 import { Web3Modal } from '@web3modal/react'
 import { createWeb3Modal } from '@web3modal/wagmi/react'
 import { setApiKey } from "@zoralabs/coins-sdk";
 
 const wagmiConfig = createConfig({
-  chains: [baseSepolia],
+  chains: [base],
   transports: {
-    [baseSepolia.id]: http('https://base-sepolia.drpc.org')
+    [base.id]: http('https://1rpc.io/base')
   }
 })
 
@@ -25,7 +25,7 @@ setApiKey(import.meta.env.VITE_ZORO_KEY);
 // 2. Create a QueryClient
 const queryClient = new QueryClient()
 
-createWeb3Modal({ wagmiConfig, projectId: '4940035ce4b4813061af223f7b3c77f4', chains: [baseSepolia] })
+createWeb3Modal({ wagmiConfig, projectId: '4940035ce4b4813061af223f7b3c77f4', chains: [base] })
 
 
 createRoot(document.getElementById('app')).render(

@@ -1,58 +1,79 @@
 import React, { useState } from "react";
-// import { parseEther } from "ethers";
-import { usePublicClient } from "wagmi";
-// import { simulateBuy } from "@zoralabs/coins-sdk";
-// import { Token, ChainId, CurrencyAmount, Ether } from '@uniswap/sdk-core';
-// import { Pool, Position, SwapPlanner } from '@uniswap/v4-sdk';
-
-export default function EthModal({ ethBalance, onBuy, onSell, onClose, loading, setLoading, coinDetails }) {
+import { createTradeCall } from "@zoralabs/coins-sdk";
+import { formatEther, parseEther } from "ethers/lib/utils";
+import { createWalletClient, custom, http } from "viem";
+import { base } from "viem/chains";
+import { toast } from "react-toastify";
+export default function EthModal({ ethBalance, userCoinBalance, setLoading, onClose, loading, erc20Address, address, coinDetails }) {
   const [tab, setTab] = useState("BUY");
   const [amount, setAmount] = useState("");
-  const [amountOut, setAmountOut] = useState("");
-  const publicClient = usePublicClient();
 
   const handleChange = (e) => {
+    e.preventDefault();
     setAmount(e.target.value);
-    if (tab === "BUY") {
-      setAmountOut(parseFloat(e.target.value) * parseFloat(coinDetails.price));
-      simulateCoinBuy(e.target.value);
-    } else {
-      setAmountOut(parseFloat(e.target.value) / parseFloat(coinDetails.price));
-    }
   };
-
-//   async function simulateCoinBuy(amount) {
-//     const provider = publicClient;
-//     const VAULT_ADDRESS = "0xFC885F37B5A9FA8159c8dBb907fc1b0C2fB31323";
-//     const UNIVERSAL_ROUTER_ADDRESS = "0x95273d871C8156636E114B63797d78D7E1720d81";
-//     const planner = new SwapPlanner({ provider, vault: VAULT_ADDRESS, universalRouter: UNIVERSAL_ROUTER_ADDRESS });
-//     const amountIn = CurrencyAmount.fromRawAmount(coinDetails?.poolKey?.currency0, amount); // 0.01 WETH
-
-//     const plan = await planner.plan({
-//     tokenIn: coinDetails?.poolKey?.currency0,
-//     tokenOut: coinDetails?.poolKey?.currency1,
-//     amountSpecified: amountIn.quotient,
-//     exactIn: true,
-//     options: {
-//         slippageTolerance: "0.5",
-//         deadline: Math.floor(Date.now() / 1000) + 60 * 10,
-//         hookData: '0x' // optional hookData for early-buyer logic
-//     }
-//     });
-//     console.log('Expected POST received1:', plan);
-//     console.log('Expected POST received2:', plan.amountOut.toSignificant());
-//   }
 
   const isDisabled = parseFloat(amount) > parseFloat(ethBalance);
-
-  const handleSubmit = () => {
-    if (tab === "BUY") {
-      onBuy(amount);
-    } else {
-      onSell(amount);
+  async function tradeCoins(type) {
+    if(amount <= 0) {
+      toast.error("Amount cannot be 0");
+      return;
     }
-    setAmount("");
-  };
+    setLoading(true);
+    let tradeParameters;
+    if(type === "BUY") {
+     tradeParameters = {
+        sell: { type: "eth" },
+        buy: {
+          type: "erc20",
+          address: erc20Address, // Creator coin address
+        },
+        amountIn: parseEther(amount.toString()), // 0.001 ETH
+        slippage: 0.05, // 5% slippage tolerance
+        sender: address,
+      };
+    } else {
+        tradeParameters = {
+            sell: { 
+              type: "erc20", 
+              address: erc20Address // Creator coin address
+            },
+            buy: { type: "eth" },
+            amountIn: parseEther(amount.toString()), // 100 tokens (adjust decimals as needed)
+            slippage: 0.15, // 15% slippage tolerance
+            sender: address,
+         };
+       }
+
+       try {
+           // Get trade call data without executing
+            const quote = await createTradeCall(tradeParameters);
+            
+            const walletClient = createWalletClient({
+              account: address,
+              chain: base,
+              transport: custom(window.ethereum)
+            });
+            
+            // Execute the call directly
+            const tx = await walletClient.sendTransaction({
+            to: quote.call.target,
+            data: quote.call.data,
+            value: BigInt(quote.call.value),
+            account: address,
+            });
+    
+            if(tx) {
+              toast.success("Transaction successful");
+              setLoading(false);
+              onClose();
+            }
+       } catch (error) {
+        console.log(error);
+        toast.error("Transaction failed");
+        setLoading(false);
+       }
+  }
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -97,7 +118,7 @@ export default function EthModal({ ethBalance, onBuy, onSell, onClose, loading, 
           )}
           {tab === "SELL" && (
             <p className="text-sm mt-4 text-gray-500 mt-1">
-              Your balance: {0} {coinDetails.symbol}
+              Your balance: {Number(formatEther(userCoinBalance)).toFixed(2)} {coinDetails.symbol}
             </p>
           )}    
         </div>
@@ -112,14 +133,14 @@ export default function EthModal({ ethBalance, onBuy, onSell, onClose, loading, 
             </button>
             <button
             disabled={isDisabled}
-            onClick={handleSubmit}
+            onClick={() => tradeCoins(tab)}
             className={`w-full cursor-pointer py-2 rounded-lg font-semibold ${
                 tab === "BUY"
                 ? "bg-[#9e74eb] text-white"
                 : "bg-red-500 text-white"
             } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
-            {tab === "BUY" ? "Purchase PHC" : "Sell PHC"}
+            {loading ? "Processing..." : tab === "BUY" ? "Purchase " + coinDetails.symbol : "Sell " + coinDetails.symbol}
             </button>
 
         </div>

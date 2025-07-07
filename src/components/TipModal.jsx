@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { toast } from 'react-toastify';
-import { getCoin, getOnchainCoinDetails } from "@zoralabs/coins-sdk";
-import { createPublicClient, http } from "viem";
-import { baseSepolia } from "viem/chains";
 
 const TipModal = ({isOpen, onClose }) => {
   const [amount, setAmount] = useState('');

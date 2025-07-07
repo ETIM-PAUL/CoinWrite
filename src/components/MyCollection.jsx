@@ -16,10 +16,12 @@ const MyCollection = ({ classType }) => {
   const navigate = useNavigate();
 
   const fetchCoinDetails =  () => {
+    if(coinDetails?.length > 0) {
     const filteredCoinDetails = coinDetails.filter(
       (coin) => coin.creatorAddress.toLowerCase() === address.toLowerCase()
     );
-    setUserCoins(filteredCoinDetails);
+    setUserCoins(filteredCoinDetails ?? []);
+    }
   }
 
   const getCategory = async (ipfs) => {
@@ -41,6 +43,7 @@ const MyCollection = ({ classType }) => {
   const fetchCategories = async () => {
     const categoryMap = {};
     setLoading(true);
+    if(coinDetails?.length > 0) {
     for (let index = 0; index < coinDetails.length; index++) {
       const element = coinDetails[index];
       try {
@@ -50,6 +53,7 @@ const MyCollection = ({ classType }) => {
         console.error(`Error fetching category for post ${element?.id}:`, error);
         categoryMap[element?.id] = 'Unknown';
       }
+    }
     }
     setCategories(categoryMap);
     setLoading(false);
