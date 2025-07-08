@@ -5,7 +5,7 @@ import { formatEther } from 'viem';
 import { ethers } from 'ethers';
 import { coinContract } from './utils';
 
-const TipModal = ({isOpen, onClose, address, coinDetails, userCoinBalance }) => {
+const TipModal = ({isOpen, onClose, getUserBalance, coinDetails, userCoinBalance }) => {
   const [amount, setAmount] = useState('');
   const [tipping, setTipping] = useState(false);
 
@@ -42,7 +42,7 @@ const TipModal = ({isOpen, onClose, address, coinDetails, userCoinBalance }) => 
 
         // Wait for the transaction to be mined
         const receipt = await tx.wait();
-        console.log('Tip sent successfully');
+        getUserBalance(coinDetails.address);
         setTipping(false);
         toast.success('Tip sent successfully');
         onClose();

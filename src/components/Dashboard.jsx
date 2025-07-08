@@ -14,7 +14,7 @@ const CreatorFlex = ({ ...props }) => {
         <img src={Profile} alt="" className="w-10 h-10" />
         <div className="grid gap-0">
           <span className="font-medium text-gray-900">{props.username}</span>
-          <span className="text-gray-700">{props.posts} posts</span>
+          <span className="text-gray-700">{props.posts} {props.posts?.length > 1 ? 'posts' : 'post'} </span>
         </div>
       </div>
     </div>
@@ -248,7 +248,7 @@ const Dashboard = () => {
             <span className="text-blue-500 mr-2 cursor-pointer">See more</span>
           </div>
           <div className="py-2 px-2 mt-3 flex w-full bg-white rounded-lg shadow">
-            <div className="flex w-full flex-wrap justify-between my-2 items-center gap-2">
+            <div className="flex w-full flex-wrap my-2 items-center gap-2">
               {Object.keys(groupCoinsByCreator(coinDetails))?.map((coin) => (
               <CreatorFlex key={coin} username={getUserName(coin)} posts={getPostCount(coin)} />
               ))}

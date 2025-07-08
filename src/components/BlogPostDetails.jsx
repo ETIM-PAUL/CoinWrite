@@ -23,10 +23,7 @@ const BlogPostDetails = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
-  const [isPutUpForSaleModalOpen, setIsPutUpForSaleModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [amount, setAmount] = useState(0);
-  const [isRemoveFromSaleModalOpen, setIsRemoveFromSaleModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [coinDetails, setCoinDetails] = useState();
   const [userCoinBalance, setUserCoinBalance] = useState(0);
@@ -49,6 +46,7 @@ const BlogPostDetails = () => {
       
       if (response?.data?.zora20Token) {
         setCoinDetails(response?.data?.zora20Token);
+        console.log(response?.data?.zora20Token);
         setIsLoading(false);
       } else {
         toast.error("Error fetching coin details");
@@ -183,7 +181,7 @@ const BlogPostDetails = () => {
                 </button>
               </div>
 
-              {coinDetails?.creatorAddress !== address && (
+              {coinDetails?.creatorAddress.toLowerCase() !== address.toLowerCase() && (
               <div className="flex items-center w-full">
                   <button
                     onClick={() => isConnected ? setIsModalOpen(true) : toast.error('Please connect your wallet to tip content')}
@@ -207,6 +205,7 @@ const BlogPostDetails = () => {
       address={address}
       userCoinBalance={userCoinBalance}
         isOpen={isModalOpen}
+        getUserBalance={getUserBalance}
         onClose={() => setIsModalOpen(false)}
       />
 
