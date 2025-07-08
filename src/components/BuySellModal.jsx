@@ -118,7 +118,7 @@ export default function EthModal({ ethBalance, userCoinBalance, setLoading, onCl
           )}
           {tab === "SELL" && (
             <p className="text-sm mt-4 text-gray-500 mt-1">
-              Your balance: {Number(formatEther(userCoinBalance)).toFixed(2)} {coinDetails.symbol}
+              Your balance: {userCoinBalance ? Number(formatEther(userCoinBalance)).toFixed(2) : 0} {coinDetails.symbol}
             </p>
           )}    
         </div>

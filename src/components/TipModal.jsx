@@ -117,7 +117,7 @@ const TipModal = ({isOpen, onClose, address, coinDetails, userCoinBalance }) => 
                   </button>
                   <button
                     type="button"
-                    disabled={amount <= 0 || tipping || amount > Number(formatEther(userCoinBalance))}
+                    disabled={amount <= 0 || tipping || amount > (userCoinBalance ? Number(formatEther(userCoinBalance)) : 0)}
                     className="inline-flex w-full disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer justify-center rounded-md border border-transparent bg-[#9e74eb] px-4 py-2 text-sm font-medium text-white hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#9e74eb] focus-visible:ring-offset-2"
                     onClick={handleTip}
                   >
