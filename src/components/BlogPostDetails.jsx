@@ -181,7 +181,7 @@ const BlogPostDetails = () => {
                 </button>
               </div>
 
-              {coinDetails?.creatorAddress.toLowerCase() !== address.toLowerCase() && (
+              {isConnected && (coinDetails?.creatorAddress.toLowerCase() !== address.toLowerCase()) && (
               <div className="flex items-center w-full">
                   <button
                     onClick={() => isConnected ? setIsModalOpen(true) : toast.error('Please connect your wallet to tip content')}

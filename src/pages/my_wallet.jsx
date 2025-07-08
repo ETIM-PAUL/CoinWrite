@@ -9,6 +9,7 @@ import { ethers } from 'ethers';
 import { getProfileBalances } from '@zoralabs/coins-sdk';
 import { formatEther } from 'ethers/lib/utils';
 import TransferModal from '../components/TransferModal';
+import ProvideLiquidityModal from '../components/ProvideLiquidityModal';
 
 const MyWallet = () => {
   const { open } = useWeb3Modal()
@@ -24,8 +25,10 @@ const MyWallet = () => {
   const { disconnect } = useDisconnect()
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const [selectedCoin, setSelectedCoin] = useState(null);
-  const [userCoinBalance, setUserCoinBalance] = useState(null);
   const [coinBalance, setCoinBalance] = useState(null);
+  const [zoraBalance, setZoraBalance] = useState(null);
+  const [isProvideLiquidityModalOpen, setIsProvideLiquidityModalOpen] = useState(false);
+
   const getUserBalance = async (erc20contract) => {
     // Initialize provider and contract
     const result = await getProfileBalances(
@@ -39,6 +42,25 @@ const MyWallet = () => {
 
     return result;
   };
+
+  const getUserZoraBalance = async () => {
+    //use etehrs and the provider
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+
+    const zoraContract = new ethers.Contract(
+      '0x1111111111166b7fe7bd91427724b487980afc69',
+      [
+        'function balanceOf(address account) view returns (uint256)',
+      ],
+      signer
+    );
+    const zoraBalance = await zoraContract.balanceOf(address);
+    const balanceInEth = ethers.utils.formatUnits(zoraBalance, 18);
+    const formattedBalance = Number(balanceInEth).toFixed(4);
+    console.log(formattedBalance);
+    setZoraBalance(formattedBalance);
+  }
 
   const handleCopy = () => {
     navigator.clipboard.writeText(address);
@@ -55,8 +77,15 @@ const MyWallet = () => {
     setIsTransferModalOpen(true);
   };
 
+  const handleInvestClick = (coin, balance) => {
+    setSelectedCoin(coin);
+    setCoinBalance(balance);
+    setIsProvideLiquidityModalOpen(true);
+  };
+
   useEffect(() => {
     getUserBalance();
+    getUserZoraBalance();
   }, [address]);
 
   return (
@@ -138,7 +167,12 @@ const MyWallet = () => {
                               <div>
                                 <div className="flex items-center gap-1">
                                   <button className="text-xs font-semibold bg-[#9e74eb] text-white px-2 py-1 rounded-md" onClick={() => handleTransferClick(token.node?.coin, token.node?.balance)}>Transfer</button>
-                                  <button className="text-xs font-semibold bg-red-500 text-white px-2 py-1 rounded-md">Invest</button>
+                                  <button
+                                    className="text-xs font-semibold bg-red-500 text-white px-2 py-1 rounded-md"
+                                    onClick={() => handleInvestClick(token.node?.coin, token.node?.balance)}
+                                  >
+                                    Invest
+                                  </button>
                                 </div>
                               </div>
                             </div>
@@ -160,6 +194,16 @@ const MyWallet = () => {
         userCoinBalance={coinBalance}
         coinDetails={selectedCoin}
         getUserBalance={getUserBalance}
+      />
+
+      <ProvideLiquidityModal
+        isOpen={isProvideLiquidityModalOpen}
+        onClose={() => setIsProvideLiquidityModalOpen(false)}
+        userCoinBalance={coinBalance}
+        userZoraBalance={zoraBalance}
+        coinDetails={selectedCoin}
+        getUserBalance={getUserBalance}
+        getUserZoraBalance={getUserZoraBalance}
       />
     </div>
   )

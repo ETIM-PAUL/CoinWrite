@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import NotyIcon from "../assets/icons/noty.svg";
 import Logo from "../assets/icons/logo.svg";
 import DashboardMenu from "../assets/icons/dashboardMob.svg";
@@ -21,9 +21,14 @@ import SettingDark from "../assets/icons/settingsDark.svg";
 import WalletDark from "../assets/icons/walletDark.svg";
 import ColDark from "../assets/icons/collectionDark.svg";
 import SideBarItem from "./SideBarItem";
-import { HiSun, HiMoon } from "react-icons/hi";
+import { useAccount } from "wagmi";
+import { PostsContext } from "../context/PostsContext";
 
 const TopHeader = () => {
+  const { isConnected, address } = useAccount();
+  const { allUsers } = useContext(PostsContext);
+  const user = address ? allUsers.find((user) => user.userAddress.toLowerCase() === address.toLowerCase()) : null;
+
   return (
     <nav className="flex flex-wrap items-start py-2 px-3 lg:px-5 bg-[#f6f2ff]">
       {/* Desktop Search Input */}
@@ -54,6 +59,7 @@ const TopHeader = () => {
       </div>
 
       {/* Right side actions */}
+        {isConnected && (
       <div className="flex gap-3 items-center justify-end w-full lg:w-1/2 mt-2 lg:mt-0">
         <div className="flex gap-2 items-center text-black">
           <img
@@ -62,11 +68,12 @@ const TopHeader = () => {
             className="w-10 h-10"
           />
           <span className="hidden lg:flex items-center font-medium">
-            @undefined
+            @{user?.username}
           </span>
           <img src={DarkDropDown} alt="Dropdown" />
         </div>
       </div>
+      )}
 
       {/* Mobile Sidebar */}
       <div className="w-full lg:hidden bg-gray-100 dark:bg-gray-900 mt-4">
