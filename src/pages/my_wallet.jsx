@@ -8,6 +8,7 @@ import { PostsContext } from '../context/PostsContext';
 import { ethers } from 'ethers';
 import { getProfileBalances } from '@zoralabs/coins-sdk';
 import { formatEther } from 'ethers/lib/utils';
+import TransferModal from '../components/TransferModal';
 
 const MyWallet = () => {
   const { open } = useWeb3Modal()
@@ -21,7 +22,10 @@ const MyWallet = () => {
   })
   const { coinDetails } = useContext(PostsContext);
   const { disconnect } = useDisconnect()
-
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+  const [selectedCoin, setSelectedCoin] = useState(null);
+  const [userCoinBalance, setUserCoinBalance] = useState(null);
+  const [coinBalance, setCoinBalance] = useState(null);
   const getUserBalance = async (erc20contract) => {
     // Initialize provider and contract
     const result = await getProfileBalances(
@@ -44,6 +48,12 @@ const MyWallet = () => {
     if (!addr) return "";
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
   }
+
+  const handleTransferClick = (coin, balance) => {
+    setSelectedCoin(coin);
+    setCoinBalance(balance);
+    setIsTransferModalOpen(true);
+  };
 
   useEffect(() => {
     getUserBalance();
@@ -112,14 +122,24 @@ const MyWallet = () => {
                         <h3 className="text-lg font-semibold text-gray-800 mb-4">Other Token Balances</h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           {coinBalances?.length > 0 && coinBalances.map((token, i) => (
-                            <div key={i} className="flex items-center p-4 bg-gray-50 rounded-xl border border-gray-200">
+                            <div key={i} className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-200">
+                              <div className="flex items-center gap-2">
                               <img src={token?.node?.coin?.mediaContent?.previewImage?.medium} alt={token.symbol} className="w-10 h-10 rounded-full mr-4" />
+                              
                               <div>
                                 <div className="flex items-center gap-1">
                                   <div className="text-lg font-semibold">{Number(formatEther(token?.node?.balance)).toFixed(2)}</div>
                                   <div className="text-sm text-gray-600">{token.node?.coin?.symbol}</div>
                                 </div>
                                 <div className="text-sm text-gray-600">{token.node?.coin?.name}</div>
+                              </div>
+                              </div>
+
+                              <div>
+                                <div className="flex items-center gap-1">
+                                  <button className="text-xs font-semibold bg-[#9e74eb] text-white px-2 py-1 rounded-md" onClick={() => handleTransferClick(token.node?.coin, token.node?.balance)}>Transfer</button>
+                                  <button className="text-xs font-semibold bg-red-500 text-white px-2 py-1 rounded-md">Invest</button>
+                                </div>
                               </div>
                             </div>
                           ))}
@@ -133,6 +153,14 @@ const MyWallet = () => {
           </div>
         </div>
       </div>
+
+      <TransferModal
+        isOpen={isTransferModalOpen}
+        onClose={() => setIsTransferModalOpen(false)}
+        userCoinBalance={coinBalance}
+        coinDetails={selectedCoin}
+        getUserBalance={getUserBalance}
+      />
     </div>
   )
 }

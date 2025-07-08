@@ -13,6 +13,7 @@ import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { useNavigate } from "react-router-dom";
 import RegisterModal from '../components/RegisterModal';
 import { plans } from "../components/utils";
+import { PostsContext } from "../context/PostsContext";
 
 
 const categories = [
@@ -73,7 +74,13 @@ function LandingPage() {
       setIsRegisterModalOpen(true);
     }
   }
+  const { coinDetails, allUsers } = useContext(PostsContext);
 
+  const getUserName = (address) => {
+    const user = allUsers.find((user) => user.userAddress.toLowerCase() === address.toLowerCase());
+
+    return user?.username;
+  }
 
   return (
       <div className="px-8">
@@ -120,14 +127,14 @@ function LandingPage() {
           <div className="mx-auto">
             <h3 className="text-2xl font-medium mb-8 text-center">Explore Most Popular Posts</h3>
             <div className="flex flex-wrap gap-4">
-              {blogs.map((blog, index) => (
-                <div key={index} className="grow max-w-[300px] cursor-pointer">
+              {coinDetails.length > 0 && coinDetails.slice(0, 4).map((blog, index) => (
+                <div key={index} onClick={() => navigate(`/blog_details/${blog?.address}`)} className="grow max-w-[300px] cursor-pointer">
                   <div className="relative w-full h-64 overflow-hidden rounded-lg shadow-lg">
-                  <img src={blog.image} alt="Background" className="absolute inset-0 w-full h-full object-cover" />
+                  <img src={blog?.mediaContent?.previewImage?.medium} alt="Background" className="absolute inset-0 w-full h-full object-cover" />
                   </div>
                   <div className="relative mt-2 text-black text-start">
-                    <h2 className="text-md font-semibold">{blog.title}</h2>
-                    <p className="mt-1 text-sm text-gray-600">{blog.author}</p>
+                    <h2 className="text-md font-semibold">{blog?.name}</h2>
+                    <p className="mt-1 text-sm text-gray-600">{getUserName(blog?.creatorAddress)}</p>
                   </div>
                 </div>
             ))}
