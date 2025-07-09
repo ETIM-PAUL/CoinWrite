@@ -4,6 +4,8 @@ CoinWrite is a decentralized content platform that allows users to create, trade
 
 ---
 
+<img src="dashbaord.png" alt="App">
+
 ## Features
 
 ### 1. **Posting Posts as Tradable Tokens**
