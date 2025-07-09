@@ -170,11 +170,10 @@ const BlogPostDetails = () => {
             <span>{formatDate(coinDetails?.createdAt)}</span>
           </div>
 
-          {isConnected && (
             <div className="flex items-center w-full gap-2">
                 <div className="flex items-center w-full">
                   <button
-                    onClick={() => setIsPurchaseModalOpen(true)}
+                    onClick={() => isConnected ? setIsPurchaseModalOpen(true) : toast.error('Please connect your wallet to trade coins')}
                   className="w-full flex items-center gap-2 cursor-pointer justify-center bg-[#9e74eb] hover:opacity-90 text-white py-3 rounded-xl transition duration-300 shadow-md"
                 >
                   <span className="text-sm text-center">Trade Coins</span>
@@ -195,7 +194,6 @@ const BlogPostDetails = () => {
             )}
 
             </div>
-          )}
         </div>
 
         <div dangerouslySetInnerHTML={{ __html: coinDetails?.description }} />
