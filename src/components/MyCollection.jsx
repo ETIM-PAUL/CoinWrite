@@ -8,7 +8,7 @@ import Loved from "../assets/icons/loved.svg";
 import Heart from "../assets/icons/heart.svg";
 
 const MyCollection = ({ classType }) => {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [userCoins, setUserCoins] = useState([]);
   const [categories, setCategories] = useState({});
   const { coinDetails } = useContext(PostsContext);
@@ -33,6 +33,9 @@ const MyCollection = ({ classType }) => {
       const metadata = await fetch(httpUrl);
       const metadataJson = await metadata.json();
       // Return the category
+      setTimeout(() => {
+        setLoading(false);
+      }, 6000);
       return metadataJson.properties?.category;
     } catch (error) {
       console.error('Error fetching metadata from IPFS:', error);
@@ -83,7 +86,7 @@ const MyCollection = ({ classType }) => {
               </button>
             </div>
 
-          {loading ? (
+          {(loading && Object.keys(categories).length === 0) && (
             // Show skeleton loader while loading
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-3">
               {[...Array(4)].map((_, index) => (
@@ -94,7 +97,9 @@ const MyCollection = ({ classType }) => {
               </div>
               ))}
             </div>
-          ) : userCoins.length > 0 ? (
+            )}
+
+            {Object.keys(categories).length > 0 && !loading && (
             // Show filtered coin details
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-3">
               {userCoins.map((coin, index) => (
@@ -111,7 +116,9 @@ const MyCollection = ({ classType }) => {
                 />
               ))}
             </div>
-          ) : (
+            )}
+
+            {(Object.keys(categories).length === 0 && !loading) && (
             // Show "No Posts yet" if there are no matching posts
             <div className="flex justify-center items-center h-40">
               <p className="text-gray-500">No Posts yet</p>

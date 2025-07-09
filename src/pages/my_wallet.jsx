@@ -43,6 +43,8 @@ const MyWallet = () => {
     return result;
   };
 
+  console.log(coinDetails);
+
   const getUserZoraBalance = async () => {
     //use etehrs and the provider
     const provider = new ethers.providers.Web3Provider(window.ethereum);

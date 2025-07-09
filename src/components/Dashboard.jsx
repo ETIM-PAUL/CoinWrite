@@ -81,7 +81,9 @@ const Dashboard = () => {
       }
     }
     setCategories(categoryMap);
-    setIsLoading(false);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 6000);
   };
 
   useEffect(() => {

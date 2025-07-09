@@ -14,7 +14,7 @@ const SidePanel = ({ posts }) => {
         </div>
         <div className="flex flex-col gap-2">
           {posts?.sort((a, b) => Number(b.marketCapDelta24h) - Number(a.marketCapDelta24h))?.map((post) => (
-          <div className="flex items-center gap-2">
+          <div key={post?.address} className="flex items-center gap-2">
           <img src={Profile} alt="" className="w-10 h-10" />
             <div>
               <p className="text-sm text-gray-900">{post?.name.length > 20 ? post?.name.slice(0, 20) + "..." : post?.name}</p>
