@@ -39,10 +39,6 @@ const ForYouPiece = ({ classType }) => {
       // Fetch metadata from IPFS
       const metadata = await fetch(httpUrl);
       const metadataJson = await metadata.json();
-      // Return the category
-      setTimeout(() => {
-        setLoading(false);
-      }, 6000);
       return metadataJson.properties?.category;
     } catch (error) {
       console.error('Error fetching metadata from IPFS:', error);
@@ -63,14 +59,39 @@ const ForYouPiece = ({ classType }) => {
         categoryMap[element?.id] = 'Unknown';
       }
     }
-  }
     setCategories(categoryMap);
+  }
+  setTimeout(() => {
+    setLoading(false);
+  }, 7000);
   };
 
     useEffect(() => {
     fetchCategories();
     fetchCoinDetails();
   }, [coinDetails]);
+
+  if (loading && Object.keys(categories).length === 0) {
+    return (
+      <div className="h-screen overflow-y-scroll space-y-10 w-full px-3 mt-4 pb-5 bg-white rounded-md">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-3">
+        {[...Array(4)].map((_, index) => (
+          <div key={index} className="animate-pulse">
+          <div className="bg-gray-200 rounded-lg h-40"></div>
+          <div className="mt-2 bg-gray-200 h-4 w-3/4 rounded"></div>
+          <div className="mt-2 bg-gray-200 h-4 w-1/2 rounded"></div>
+        </div>
+        ))}
+        </div>
+      </div>
+  );
+  }
+  
+  if (!loading && Object.keys(categories).length === 0) {
+    return <div className="flex bg-white justify-center items-center h-screen">
+      <div className="text-2xl font-bold">No posts found</div>
+    </div>;
+  }
 
   return (
     <div className="flex">
@@ -90,21 +111,6 @@ const ForYouPiece = ({ classType }) => {
           </div>
           )}
 
-        {(loading && Object.keys(categories).length === 0) && (
-            // Show skeleton loader while loading
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-3">
-              {[...Array(4)].map((_, index) => (
-                <div key={index} className="animate-pulse">
-                <div className="bg-gray-200 rounded-lg h-40"></div>
-                <div className="mt-2 bg-gray-200 h-4 w-3/4 rounded"></div>
-                <div className="mt-2 bg-gray-200 h-4 w-1/2 rounded"></div>
-              </div>
-              ))}
-            </div>
-            )}
-
-            {Object.keys(categories).length > 0 && !loading && (
-            // Show filtered coin details
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-3">
               {userCoins.map((coin, index) => (
                 <NftCard
@@ -120,13 +126,6 @@ const ForYouPiece = ({ classType }) => {
                 />
               ))}
             </div>
-            )}
-            {(Object.keys(categories).length === 0 && !loading) && (
-            // Show "No Posts yet" if there are no matching posts
-            <div className="flex justify-center items-center h-40">
-              <p className="text-gray-500">No Posts yet</p>
-            </div>
-          )}
         </section>
 
         

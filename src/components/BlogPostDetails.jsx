@@ -14,7 +14,6 @@ import { getCoin, getProfileBalances } from '@zoralabs/coins-sdk';
 import { base, baseSepolia } from 'viem/chains';
 import {formatDate } from './utils';
 import { FaCoins, FaHashtag, FaAddressCard, FaChartLine, FaCubes, FaUsers, FaExchangeAlt, FaHistory, FaExternalLinkAlt, FaUserCircle } from "react-icons/fa";
-import { formatEther } from 'viem';
 
 const BlogPostDetails = () => {
   const { address, isConnected } = useAccount();
@@ -23,8 +22,9 @@ const BlogPostDetails = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  const [purchaseLoading, setPurchaseLoading] = useState(false);
   const [coinDetails, setCoinDetails] = useState();
   const [userCoinBalance, setUserCoinBalance] = useState(0);
   const { data: ethBalance } = useBalance({
@@ -170,6 +170,7 @@ const BlogPostDetails = () => {
             <span>{formatDate(coinDetails?.createdAt)}</span>
           </div>
 
+          {isConnected && (
             <div className="flex items-center w-full gap-2">
                 <div className="flex items-center w-full">
                   <button
@@ -181,7 +182,7 @@ const BlogPostDetails = () => {
                 </button>
               </div>
 
-              {isConnected && (coinDetails?.creatorAddress.toLowerCase() !== address.toLowerCase()) && (
+              {(coinDetails?.creatorAddress.toLowerCase() !== address.toLowerCase()) && (
               <div className="flex items-center w-full">
                   <button
                     onClick={() => isConnected ? setIsModalOpen(true) : toast.error('Please connect your wallet to tip content')}
@@ -194,6 +195,7 @@ const BlogPostDetails = () => {
             )}
 
             </div>
+          )}
         </div>
 
         <div dangerouslySetInnerHTML={{ __html: coinDetails?.description }} />
@@ -217,8 +219,8 @@ const BlogPostDetails = () => {
           onSell={handlePurchase}
           onBuy={handlePurchase}
           onClose={() => setIsPurchaseModalOpen(false)}
-          loading={loading}
-          setLoading={setLoading}
+          loading={purchaseLoading}
+          setLoading={setPurchaseLoading}
           address={address}
           coinDetails={coinDetails}
           erc20Address={id}

@@ -40,6 +40,21 @@ export const plans = [
 
 export const coinContract = "0x1CB7160E2Ed02aAFe8Ee98160460BFf4D2caBB31"
 
+export const groupedData = (data, categories) => {
+    return data.reduce((acc, coin) => {
+    const category = categories[coin.tokenUri];
+    if (!acc[category]) {
+      acc[category] = {
+        posts: 0,
+        creators: new Set()
+      };
+    }
+    acc[category].posts += 1;
+    acc[category].creators.add(coin.creatorAddress);
+    return acc;
+  }, {});
+}
+
 export const abi = [
     {
         "inputs": [],

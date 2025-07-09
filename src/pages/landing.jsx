@@ -23,43 +23,6 @@ const categories = [
 ];
 
 function LandingPage() {
-  const [blogs, setBlogs] = useState([
-    {
-      id: 1,
-      title: "3 Crazy Friends",
-      content: "This is the content of the first blog post.",
-      image: three,
-      author: "John Doe",
-    },
-    {
-      id: 2,
-      title: "Everything Goes",
-      content: "This is the content of the first blog post.",
-      image: everything,
-      author: "Entertainment Studio",
-    },
-    {
-      id: 3,
-      title: "Laugh With Me",
-      content: "This is the content of the first blog post.",
-      image: laugh,
-      author: "John Doe",
-    },
-    {
-      id: 4,
-      title: "The Time is Now",
-      content: "This is the content of the first blog post.",
-      image: time,
-      author: "Everyday Philosophy",
-    },
-    {
-      id: 5,
-      title: "Life is a Journey",
-      content: "This is the content of the first blog post.",
-      image: everything,
-      author: "Entertainment Studio",
-    },
-  ]);
   const { open } = useWeb3Modal()
   const navigate = useNavigate()
   const { isConnected } = useAccount();
@@ -81,6 +44,8 @@ function LandingPage() {
 
     return user?.username;
   }
+
+  console.log(coinDetails);
 
   return (
       <div className="px-8">

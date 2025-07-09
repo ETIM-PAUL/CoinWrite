@@ -52,8 +52,9 @@ CoinWrite is a decentralized content platform that allows users to create, trade
    - **Interoperability**: Base's compatibility with Ethereum allows for easy integration with existing Ethereum tools and services.
 
 ### 3. **AI Server**
-   - **LLM Model**: A server-side AI model processes post content, correcting grammatical errors and refining the text.
+   - **LLM Model**: A local server-side AI model processes post content, correcting grammatical errors and refining the text.
    - **API Integration**: The AI server is integrated into the platform via an API, ensuring real-time content refinement.
+
 
 ### 4. **IPFS and Pinata**
    - **Decentralized Storage**: Post content and banner images are uploaded to IPFS using Pinata, ensuring decentralization and immutability.
@@ -69,11 +70,14 @@ CoinWrite is a decentralized content platform that allows users to create, trade
 
 ### 1. **Beautiful and Intuitive Design**
    - **Tailwind CSS**: The platform uses Tailwind CSS for a modern and responsive design.
+
    - **User-Friendly**: The interface is designed to be easy to use, even for non-technical users.
+
 
 ### 2. **Personalized Experience**
    - **For You Page (FYP)**: The FYP is personalized based on the user's interests, ensuring they see relevant content.
    - **Dashboard**: The dashboard provides an overview of the user's posts, coins, and wallet balance.
+
 
 ### 3. **Seamless Navigation**
    - **Sidebar and Top Header**: The sidebar and top header provide easy navigation between different sections of the platform.
@@ -81,28 +85,42 @@ CoinWrite is a decentralized content platform that allows users to create, trade
 
 ---
 
+
+
 ## How It Works
 
 ### 1. **User Registration**
    - Users register with a username, subscription tier, and interests.
    - The subscription tier determines the posting fee and benefits.
 
+   <img  src="home_2.png" alt="Register">
+
 ### 2. **Post Creation**
    - Users create posts, which are tokenized using the Zora SDK.
    - Post content and banner images are uploaded to IPFS using Pinata.
 
+   <img  src="blog_details.png" alt="Post Details">
+
 ### 3. **Content Refinement**
    - The AI server processes the post content, correcting grammatical errors and refining the text.
+
+   <img  src="ai.png" alt="AI">
 
 ### 4. **Trading and Tipping**
    - Users can buy, sell, and trade post tokens on the platform.
    - Users can tip post creators using ERC20 tokens.
 
+   <img  src="trade.png" alt="Trading">
+
 ### 5. **Wallet Management**
    - Users can track their coins and transfer them to other wallets.
 
+   <img  src="wallet.png" alt="wallet">
+
 ### 6. **Liquidity Provision**
    - Users can provide liquidity for trading post tokens, earning rewards for facilitating trades.
+
+   <img  src="invest.png" alt="Liqudity">
 
 ---
 

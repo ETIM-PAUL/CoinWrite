@@ -5,7 +5,7 @@ import NftCard from "./NftCard";
 import Loved from "../assets/icons/loved.svg";
 import Heart from "../assets/icons/heart.svg";
 import { PostsContext } from "../context/PostsContext";
-import { groupCoinsByCreator } from "./utils";
+import { groupCoinsByCreator, groupedData } from "./utils";
 
 const CreatorFlex = ({ ...props }) => {
   return (
@@ -269,53 +269,27 @@ const Dashboard = () => {
                 <tr className="border-b border-gray-200">
                   <th className="px-4 py-2 text-left">Category</th>
                   <th className="px-4 py-2 text-left">Volume</th>
-                  <th className="px-4 py-2 text-left">24h</th>
+                  {/* <th className="px-4 py-2 text-left">24h</th> */}
                   <th className="px-4 py-2 text-left">Creators</th>
                 </tr>
               </thead>
               <tbody>
-                <tr className="py-">
+                {Object.keys(groupedData(coinDetails, categories)).map((category, index) => (
+                <tr key={index} className="py-">
                   <td className="px-4">
-                    <span>Web3</span>
+                    <span>{category}</span>
                   </td>
                   <td className="px-4">
-                    <span>10</span>
+                    <span>{groupedData(coinDetails, categories)[category].posts}</span>
                   </td>
-                  <td className="px-4 text-red-500">
+                  {/* <td className="px-4 text-red-500">
                     <span>-0.20%</span>
-                  </td>
+                  </td> */}
                   <td className="px-4">
-                    <span>5</span>
+                    <span>{groupedData(coinDetails, categories)[category].creators.size}</span>
                   </td>
                 </tr>
-                <tr className="">
-                  <td className="px-4">
-                    <span>Sports</span>
-                  </td>
-                  <td className="px-4">
-                    <span>6</span>
-                  </td>
-                  <td className="px-4 text-green-500">
-                    <span>+2.20%</span>
-                  </td>
-                  <td className="px-4">
-                    <span>3</span>
-                  </td>
-                </tr>
-                <tr className="">
-                  <td className="px-4">
-                    <span>Art</span>
-                  </td>
-                  <td className="px-4">
-                    <span>12</span>
-                  </td>
-                  <td className="px-4 text-green-500">
-                    <span>+10.20%</span>
-                  </td>
-                  <td className="px-4">
-                    <span>6</span>
-                  </td>
-                </tr>
+                ))}
               </tbody>
             </table>
           </div>

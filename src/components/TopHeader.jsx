@@ -1,12 +1,7 @@
 import React, { useContext } from "react";
-import NotyIcon from "../assets/icons/noty.svg";
 import Logo from "../assets/icons/logo.svg";
 import DashboardMenu from "../assets/icons/dashboardMob.svg";
-import DashboardMenuLight from "../assets/icons/dashboardMobLight.svg";
-import LogoDark from "../assets/icons/logoDark.svg";
-import DarkNotyIcon from "../assets/icons/darkNoty.svg";
 import Profile from "../assets/icons/profile.svg";
-import DropDown from "../assets/icons/dropdown.svg";
 import DarkDropDown from "../assets/icons/darkDropDown.svg";
 import Market from "../assets/icons/market.svg";
 import Dashboard from "../assets/icons/dashboard.svg";
@@ -59,7 +54,7 @@ const TopHeader = () => {
       </div>
 
       {/* Right side actions */}
-        {isConnected && (
+        {(isConnected && user?.username) && (
       <div className="flex gap-3 items-center justify-end w-full lg:w-1/2 mt-2 lg:mt-0">
         <div className="flex gap-2 items-center text-black">
           <img
